@@ -1,13 +1,91 @@
 {
-  "oppdatert": "2026-09-28T12:27:51Z",
-  "samlet": "oppe",
+  "oppdatert": "2026-09-28T12:31:36Z",
+  "samlet": "nede",
   "tjenester": [
-    { "id": "app", "navn": "Plattformen", "tilstand": "ukjent", "siden": null, "sistSjekk": null, "svartidMs": null, "oppetid": { "d7": null, "d30": null, "d90": null }, "dager": [] },
-    { "id": "nettside", "navn": "Nettsiden", "tilstand": "ukjent", "siden": null, "sistSjekk": null, "svartidMs": null, "oppetid": { "d7": null, "d30": null, "d90": null }, "dager": [] },
-    { "id": "supabase-prod", "navn": "Database", "tilstand": "ukjent", "siden": null, "sistSjekk": null, "svartidMs": null, "oppetid": { "d7": null, "d30": null, "d90": null }, "dager": [] },
-    { "id": "meet", "navn": "Møter", "tilstand": "ukjent", "siden": null, "sistSjekk": null, "svartidMs": null, "oppetid": { "d7": null, "d30": null, "d90": null }, "dager": [] },
-    { "id": "resend", "navn": "E-post", "tilstand": "ukjent", "siden": null, "sistSjekk": null, "svartidMs": null, "oppetid": { "d7": null, "d30": null, "d90": null }, "dager": [] },
-    { "id": "livekit", "navn": "Video", "tilstand": "ukjent", "siden": null, "sistSjekk": null, "svartidMs": null, "oppetid": { "d7": null, "d30": null, "d90": null }, "dager": [] }
+    {
+      "id": "app",
+      "navn": "Plattformen",
+      "tilstand": "oppe",
+      "siden": null,
+      "sistSjekk": "2026-09-28T12:31:36Z",
+      "svartidMs": 639,
+      "oppetid": {
+        "d7": null,
+        "d30": null,
+        "d90": null
+      },
+      "dager": []
+    },
+    {
+      "id": "nettside",
+      "navn": "Nettsiden",
+      "tilstand": "oppe",
+      "siden": null,
+      "sistSjekk": "2026-09-28T12:31:36Z",
+      "svartidMs": 861,
+      "oppetid": {
+        "d7": null,
+        "d30": null,
+        "d90": null
+      },
+      "dager": []
+    },
+    {
+      "id": "supabase-prod",
+      "navn": "Database",
+      "tilstand": "nede",
+      "siden": null,
+      "sistSjekk": "2026-09-28T12:31:36Z",
+      "svartidMs": 487,
+      "oppetid": {
+        "d7": null,
+        "d30": null,
+        "d90": null
+      },
+      "dager": []
+    },
+    {
+      "id": "meet",
+      "navn": "Møter",
+      "tilstand": "oppe",
+      "siden": null,
+      "sistSjekk": "2026-09-28T12:31:36Z",
+      "svartidMs": 494,
+      "oppetid": {
+        "d7": null,
+        "d30": null,
+        "d90": null
+      },
+      "dager": []
+    },
+    {
+      "id": "resend",
+      "navn": "E-post",
+      "tilstand": "ukjent",
+      "siden": null,
+      "sistSjekk": null,
+      "svartidMs": null,
+      "oppetid": {
+        "d7": null,
+        "d30": null,
+        "d90": null
+      },
+      "dager": []
+    },
+    {
+      "id": "livekit",
+      "navn": "Video",
+      "tilstand": "ukjent",
+      "siden": null,
+      "sistSjekk": null,
+      "svartidMs": null,
+      "oppetid": {
+        "d7": null,
+        "d30": null,
+        "d90": null
+      },
+      "dager": []
+    }
   ],
   "hendelser": []
 }
