@@ -6,7 +6,7 @@
 <meta name="description" content="Driftsstatus for Flowment: plattformen, nettsiden, database, møter, e-post og video. Oppdateres hvert minutt.">
 <meta name="color-scheme" content="light dark">
 <title>Flowment driftsstatus</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6' fill='%2322a06b'/%3E%3C/svg%3E">
+<link rel="icon" href="brand/brand-icon.svg" type="image/svg+xml">
 <style>
   :root {
     --bg: #f6f7f9;
@@ -78,7 +78,10 @@
   main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
 
   header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; margin-bottom: 16px; }
-  h1 { font-size: 1.35rem; margin: 0; font-weight: 650; letter-spacing: -0.01em; }
+  h1 { display: flex; align-items: center; gap: 10px; font-size: 1.35rem; margin: 0; font-weight: 500; letter-spacing: -0.01em; color: var(--tekst-svak); }
+  h1 picture, h1 img { display: block; }
+  h1 img { height: 32px; width: auto; }
+  @media (max-width: 480px) { h1 img { height: 28px; } h1 { font-size: 1.2rem; } }
   #oppdatert { color: var(--tekst-svak); font-size: 0.9rem; }
 
   .banner {
@@ -156,7 +159,14 @@
 <body>
 <main>
   <header>
-    <h1>Flowment driftsstatus</h1>
+    <h1>
+      <!-- brand-logo-light.svg har mørk fyll (til lys bakgrunn), brand-logo-dark.svg hvit (til mørk). -->
+      <picture>
+        <source srcset="brand/brand-logo-dark.svg" media="(prefers-color-scheme: dark)">
+        <img src="brand/brand-logo-light.svg" alt="Flowment" width="166" height="40">
+      </picture>
+      <span>driftsstatus</span>
+    </h1>
     <div id="oppdatert">Henter status …</div>
   </header>
 
