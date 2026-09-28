@@ -1,14 +1,14 @@
 {
-  "oppdatert": "2026-09-28T12:31:36Z",
-  "samlet": "nede",
+  "oppdatert": "2026-09-28T12:34:39Z",
+  "samlet": "oppe",
   "tjenester": [
     {
       "id": "app",
       "navn": "Plattformen",
       "tilstand": "oppe",
       "siden": null,
-      "sistSjekk": "2026-09-28T12:31:36Z",
-      "svartidMs": 639,
+      "sistSjekk": "2026-09-28T12:34:39Z",
+      "svartidMs": 658,
       "oppetid": {
         "d7": null,
         "d30": null,
@@ -21,8 +21,8 @@
       "navn": "Nettsiden",
       "tilstand": "oppe",
       "siden": null,
-      "sistSjekk": "2026-09-28T12:31:36Z",
-      "svartidMs": 861,
+      "sistSjekk": "2026-09-28T12:34:39Z",
+      "svartidMs": 791,
       "oppetid": {
         "d7": null,
         "d30": null,
@@ -33,10 +33,10 @@
     {
       "id": "supabase-prod",
       "navn": "Database",
-      "tilstand": "nede",
+      "tilstand": "oppe",
       "siden": null,
-      "sistSjekk": "2026-09-28T12:31:36Z",
-      "svartidMs": 487,
+      "sistSjekk": "2026-09-28T12:34:39Z",
+      "svartidMs": 476,
       "oppetid": {
         "d7": null,
         "d30": null,
@@ -49,8 +49,8 @@
       "navn": "Møter",
       "tilstand": "oppe",
       "siden": null,
-      "sistSjekk": "2026-09-28T12:31:36Z",
-      "svartidMs": 494,
+      "sistSjekk": "2026-09-28T12:34:39Z",
+      "svartidMs": 583,
       "oppetid": {
         "d7": null,
         "d30": null,
