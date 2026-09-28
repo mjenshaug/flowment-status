@@ -5,65 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="Driftsstatus for Flowment: plattformen, nettsiden, database, møter, e-post og video. Oppdateres hvert minutt.">
 <meta name="color-scheme" content="light dark">
+<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F4F5F7">
+<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#141C27">
 <title>Flowment driftsstatus</title>
 <link rel="icon" href="brand/brand-icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Inter er skriften i admin og på flowment.no. Faller tilbake til systemskrift om fonts.googleapis.com ikke svarer: en statusside skal virke når alt annet er nede. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <style>
+  /* Paletten er Flowment sin (admin/globals.css): navy som tekst og mørk flate, teal som
+     eneste aksent. Statusfargene er de samme som i admin, så «grønn» betyr det samme her
+     som på /drift. Mørk modus bygger på navy, ikke på nøytralt svart. */
   :root {
-    --bg: #f6f7f9;
-    --flate: #ffffff;
-    --kant: #e2e5ea;
-    --tekst: #1b1f24;
-    --tekst-svak: #5c6572;
-    --gronn: #22a06b;
-    --gronn-bg: #e4f5ec;
-    --gul: #d9930d;
-    --gul-bg: #fcf1d8;
-    --rod: #d64545;
-    --rod-bg: #fbe4e4;
-    --graa: #c5cad2;
-    --graa-bg: #eef0f3;
-    --varsel-bg: #fcf1d8;
-    --varsel-kant: #e9c77a;
-    --lenke: #1f5fbf;
-    --stolpe-h: 30px;
+    --bg: #F4F5F7;
+    --flate: #FFFFFF;
+    --flate-2: #EEF1F4;
+    --kant: #E4E7EC;
+    --kant-sterk: #CBD2DB;
+    --tekst: #1E2A38;
+    --tekst-svak: #5C6776;
+    --tekst-svakere: #8A94A3;
+    --teal: #2F8F9D;
+    --teal-bg: #EAF4F6;
+    --gronn: #1B7F4F;
+    --gronn-bg: #E6F3EC;
+    --gronn-kant: #BFE0CE;
+    --gul: #B97A1F;
+    --gul-bg: #FBF1E0;
+    --gul-kant: #EDD3A4;
+    --rod: #B43A3A;
+    --rod-bg: #FAE8E8;
+    --rod-kant: #EFC0C0;
+    --graa: #C9D0D9;
+    --graa-bg: #EEF1F4;
+    --skygge: 0 1px 2px rgba(30, 42, 56, 0.06), 0 4px 16px rgba(30, 42, 56, 0.05);
+    --stolpe-h: 32px;
+    --radius: 12px;
+    --radius-sm: 3px;
   }
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-      --bg: #0f1216;
-      --flate: #171b21;
-      --kant: #2a3038;
-      --tekst: #e8ebef;
-      --tekst-svak: #98a2b0;
-      --gronn: #3ec48a;
-      --gronn-bg: #143126;
-      --gul: #e8b13c;
-      --gul-bg: #3a2d10;
-      --rod: #f06a6a;
-      --rod-bg: #3d1a1a;
-      --graa: #3a414b;
-      --graa-bg: #20252c;
-      --varsel-bg: #3a2d10;
-      --varsel-kant: #6b5220;
-      --lenke: #7fb0ff;
+      --bg: #141C27;
+      --flate: #1E2A38;
+      --flate-2: #24313F;
+      --kant: #2E3A4C;
+      --kant-sterk: #3E4C60;
+      --tekst: #EEF1F4;
+      --tekst-svak: #A7B0BD;
+      --tekst-svakere: #7C8797;
+      --teal: #52AEBB;
+      --teal-bg: #1B3A41;
+      --gronn: #4CC38A;
+      --gronn-bg: #16352A;
+      --gronn-kant: #22523F;
+      --gul: #E2AA4B;
+      --gul-bg: #3A2C13;
+      --gul-kant: #5A451F;
+      --rod: #F07A7A;
+      --rod-bg: #3E1E1E;
+      --rod-kant: #5F2C2C;
+      --graa: #3E4C60;
+      --graa-bg: #24313F;
+      --skygge: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
     }
   }
   :root[data-theme="dark"] {
-    --bg: #0f1216;
-    --flate: #171b21;
-    --kant: #2a3038;
-    --tekst: #e8ebef;
-    --tekst-svak: #98a2b0;
-    --gronn: #3ec48a;
-    --gronn-bg: #143126;
-    --gul: #e8b13c;
-    --gul-bg: #3a2d10;
-    --rod: #f06a6a;
-    --rod-bg: #3d1a1a;
-    --graa: #3a414b;
-    --graa-bg: #20252c;
-    --varsel-bg: #3a2d10;
-    --varsel-kant: #6b5220;
-    --lenke: #7fb0ff;
+    --bg: #141C27;
+    --flate: #1E2A38;
+    --flate-2: #24313F;
+    --kant: #2E3A4C;
+    --kant-sterk: #3E4C60;
+    --tekst: #EEF1F4;
+    --tekst-svak: #A7B0BD;
+    --tekst-svakere: #7C8797;
+    --teal: #52AEBB;
+    --teal-bg: #1B3A41;
+    --gronn: #4CC38A;
+    --gronn-bg: #16352A;
+    --gronn-kant: #22523F;
+    --gul: #E2AA4B;
+    --gul-bg: #3A2C13;
+    --gul-kant: #5A451F;
+    --rod: #F07A7A;
+    --rod-bg: #3E1E1E;
+    --rod-kant: #5F2C2C;
+    --graa: #3E4C60;
+    --graa-bg: #24313F;
+    --skygge: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
   }
 
   * { box-sizing: border-box; }
@@ -72,53 +101,94 @@
     margin: 0;
     background: var(--bg);
     color: var(--tekst);
-    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font: 16px/1.5 Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-feature-settings: "cv11", "ss01";
   }
-  a { color: var(--lenke); }
-  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
+  ::selection { background: var(--teal); color: #fff; }
+  :focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; border-radius: 4px; }
+  a { color: var(--teal); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { text-decoration-thickness: 2px; }
+  .tall { font-variant-numeric: tabular-nums; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; margin-bottom: 16px; }
-  h1 { display: flex; align-items: center; gap: 10px; font-size: 1.35rem; margin: 0; font-weight: 500; letter-spacing: -0.01em; color: var(--tekst-svak); }
-  h1 picture, h1 img { display: block; }
-  h1 img { height: 32px; width: auto; }
-  @media (max-width: 480px) { h1 img { height: 28px; } h1 { font-size: 1.2rem; } }
-  #oppdatert { color: var(--tekst-svak); font-size: 0.9rem; }
+  main { max-width: 880px; margin: 0 auto; padding: 28px 16px 56px; }
+  @media (min-width: 640px) { main { padding: 40px 24px 72px; } }
 
-  .banner {
-    display: flex; align-items: center; gap: 12px;
-    padding: 16px 18px; border-radius: 10px; border: 1px solid var(--kant);
-    background: var(--flate); font-weight: 600; font-size: 1.05rem;
+  /* ===== Topp ===== */
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; margin-bottom: 28px; }
+  .merkevare { display: flex; align-items: center; gap: 12px; margin: 0; }
+  .merkevare picture, .merkevare img { display: block; }
+  .merkevare img { height: 30px; width: auto; }
+  .merkevare .skille { width: 1px; height: 22px; background: var(--kant-sterk); }
+  .merkevare .tittel { font-size: 1rem; font-weight: 500; color: var(--tekst-svak); letter-spacing: -0.005em; }
+
+  .live { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--tekst-svak); }
+  .live .puls { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--graa); flex: none; }
+  .live[data-modus="live"] .puls { background: var(--teal); }
+  .live[data-modus="live"] .puls::after {
+    content: ""; position: absolute; inset: -4px; border-radius: 50%;
+    border: 2px solid var(--teal); opacity: 0; animation: puls 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
   }
-  .banner .prikk { width: 14px; height: 14px; border-radius: 50%; flex: none; background: var(--graa); }
-  .banner[data-samlet="oppe"] { background: var(--gronn-bg); border-color: transparent; }
-  .banner[data-samlet="oppe"] .prikk { background: var(--gronn); }
-  .banner[data-samlet="treg"] { background: var(--gul-bg); border-color: transparent; }
-  .banner[data-samlet="treg"] .prikk { background: var(--gul); }
-  .banner[data-samlet="nede"] { background: var(--rod-bg); border-color: transparent; }
-  .banner[data-samlet="nede"] .prikk { background: var(--rod); }
+  .live[data-modus="reserve"] .puls { background: var(--gul); }
+  @keyframes puls { 0% { transform: scale(0.4); opacity: 0.8; } 100% { transform: scale(1.4); opacity: 0; } }
+
+  /* ===== Samlet status ===== */
+  .samlet {
+    display: grid; grid-template-columns: auto 1fr; gap: 6px 16px; align-items: center;
+    padding: 22px 22px; border-radius: var(--radius); border: 1px solid var(--kant);
+    background: var(--flate); box-shadow: var(--skygge);
+    transition: background-color 400ms ease, border-color 400ms ease;
+  }
+  .samlet .ikon { grid-row: span 2; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: var(--graa-bg); color: var(--tekst-svak); }
+  .samlet .ikon svg { width: 24px; height: 24px; display: block; }
+  .samlet .ikon svg[hidden] { display: none; }
+  .samlet h1 { margin: 0; font-size: 1.4rem; line-height: 1.25; font-weight: 600; letter-spacing: -0.015em; text-wrap: balance; }
+  .samlet p { margin: 0; color: var(--tekst-svak); font-size: 0.95rem; }
+  .samlet[data-samlet="oppe"] { background: var(--gronn-bg); border-color: var(--gronn-kant); }
+  .samlet[data-samlet="oppe"] .ikon { background: var(--gronn); color: #fff; }
+  .samlet[data-samlet="oppe"] p { color: color-mix(in srgb, var(--gronn) 70%, var(--tekst)); }
+  .samlet[data-samlet="treg"] { background: var(--gul-bg); border-color: var(--gul-kant); }
+  .samlet[data-samlet="treg"] .ikon { background: var(--gul); color: #fff; }
+  .samlet[data-samlet="treg"] p { color: color-mix(in srgb, var(--gul) 70%, var(--tekst)); }
+  .samlet[data-samlet="nede"] { background: var(--rod-bg); border-color: var(--rod-kant); }
+  .samlet[data-samlet="nede"] .ikon { background: var(--rod); color: #fff; }
+  .samlet[data-samlet="nede"] p { color: color-mix(in srgb, var(--rod) 70%, var(--tekst)); }
+  @media (max-width: 480px) {
+    .samlet { padding: 18px; gap: 4px 14px; }
+    .samlet .ikon { width: 38px; height: 38px; }
+    .samlet h1 { font-size: 1.2rem; }
+  }
 
   #reserve {
-    display: none; margin-top: 12px; padding: 10px 14px; border-radius: 8px;
-    background: var(--varsel-bg); border: 1px solid var(--varsel-kant); font-size: 0.92rem;
+    display: none; margin-top: 12px; padding: 12px 16px; border-radius: 10px;
+    background: var(--gul-bg); border: 1px solid var(--gul-kant); font-size: 0.9rem;
+    color: color-mix(in srgb, var(--gul) 70%, var(--tekst));
   }
-  #reserve.vis { display: block; }
+  #reserve.vis { display: flex; gap: 10px; align-items: flex-start; }
+  #reserve svg { width: 18px; height: 18px; flex: none; margin-top: 2px; }
 
-  section { margin-top: 28px; }
-  h2 { font-size: 1rem; font-weight: 650; margin: 0 0 10px; color: var(--tekst-svak); text-transform: uppercase; letter-spacing: 0.04em; }
+  /* ===== Seksjoner ===== */
+  section { margin-top: 40px; }
+  .seksjonstopp { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 0 12px; flex-wrap: wrap; }
+  h2 { font-size: 1.05rem; font-weight: 600; margin: 0; letter-spacing: -0.01em; }
+  .seksjonstopp .hint { color: var(--tekst-svakere); font-size: 0.85rem; }
 
-  .kort { background: var(--flate); border: 1px solid var(--kant); border-radius: 10px; overflow: hidden; }
-  .tjeneste { padding: 14px 16px; border-top: 1px solid var(--kant); }
+  .kort { background: var(--flate); border: 1px solid var(--kant); border-radius: var(--radius); box-shadow: var(--skygge); overflow: hidden; }
+
+  /* ===== Tjenester ===== */
+  .tjeneste { padding: 18px 20px 16px; border-top: 1px solid var(--kant); }
   .tjeneste:first-child { border-top: 0; }
-  .tjeneste .topp { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .tjeneste .navn { font-weight: 600; }
-  .tjeneste .siden { color: var(--tekst-svak); font-size: 0.85rem; font-weight: 400; margin-left: 8px; }
+  .tjeneste .topp { display: flex; align-items: baseline; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; }
+  .tjeneste .navn { font-weight: 600; font-size: 1rem; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .tjeneste .siden { color: var(--tekst-svak); font-size: 0.85rem; font-weight: 400; }
+  .tjeneste .hoyre { display: flex; align-items: baseline; gap: 14px; }
 
   .merke {
     display: inline-flex; align-items: center; gap: 6px;
-    font-size: 0.82rem; font-weight: 600; padding: 3px 10px; border-radius: 999px;
-    background: var(--graa-bg); color: var(--tekst-svak);
+    font-size: 0.8rem; font-weight: 600; padding: 3px 10px 3px 8px; border-radius: 999px;
+    background: var(--graa-bg); color: var(--tekst-svak); line-height: 1.4;
   }
-  .merke::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--graa); }
+  .merke::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--graa); }
   .merke[data-tilstand="oppe"] { background: var(--gronn-bg); color: var(--gronn); }
   .merke[data-tilstand="oppe"]::before { background: var(--gronn); }
   .merke[data-tilstand="treg"] { background: var(--gul-bg); color: var(--gul); }
@@ -126,71 +196,135 @@
   .merke[data-tilstand="nede"] { background: var(--rod-bg); color: var(--rod); }
   .merke[data-tilstand="nede"]::before { background: var(--rod); }
 
-  .stolper { display: flex; gap: 2px; height: var(--stolpe-h); margin-top: 10px; }
-  .stolpe { flex: 1 1 0; min-width: 0; border-radius: 2px; background: var(--graa); }
+  .stolper { display: flex; gap: 3px; height: var(--stolpe-h); margin-top: 12px; }
+  .stolpe { flex: 1 1 0; min-width: 0; border-radius: var(--radius-sm); background: var(--graa-bg); transition: transform 120ms ease, opacity 120ms ease; }
   .stolpe[data-niv="gronn"] { background: var(--gronn); }
   .stolpe[data-niv="gul"] { background: var(--gul); }
   .stolpe[data-niv="rod"] { background: var(--rod); }
-  .stolpe:hover { opacity: 0.75; }
+  .stolpe[data-niv="ingen"] { background: var(--flate-2); }
+  .stolper:hover .stolpe { opacity: 0.55; }
+  .stolper .stolpe:hover { opacity: 1; transform: scaleY(1.12); }
 
-  .oppetid { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; color: var(--tekst-svak); font-size: 0.8rem; flex-wrap: wrap; }
+  .akse { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 8px; color: var(--tekst-svakere); font-size: 0.78rem; }
+  .akse .linje { flex: 1; height: 1px; background: var(--kant); }
+  .oppetid { display: flex; gap: 18px; margin-top: 8px; color: var(--tekst-svak); font-size: 0.82rem; flex-wrap: wrap; }
+  .oppetid span { white-space: nowrap; }
+  .oppetid .dager::after { content: " dager"; }
   .oppetid span b { font-weight: 600; color: var(--tekst); }
 
-  .hendelse { padding: 14px 16px; border-top: 1px solid var(--kant); }
-  .hendelse:first-child { border-top: 0; }
-  .hendelse .linje1 { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
-  .hendelse .type { font-weight: 600; }
-  .hendelse .type[data-type="nede"] { color: var(--rod); }
-  .hendelse .type[data-type="treg"] { color: var(--gul); }
-  .hendelse .naar { color: var(--tekst-svak); font-size: 0.88rem; }
-  .hendelse .aarsak { margin-top: 4px; font-size: 0.92rem; }
-  .hendelse .paagaar { color: var(--rod); font-weight: 600; }
+  /* Ett felles verktøytips for alle stolpene: flyttes dit pekeren er. */
+  #tips {
+    position: fixed; z-index: 10; pointer-events: none; display: none;
+    padding: 8px 10px; border-radius: 8px; background: var(--tekst); color: var(--bg);
+    font-size: 0.8rem; line-height: 1.4; box-shadow: var(--skygge); max-width: 240px;
+    transform: translate(-50%, calc(-100% - 10px));
+  }
+  #tips.vis { display: block; }
+  #tips b { font-weight: 600; }
+  #tips .under { opacity: 0.75; }
 
-  .tom { padding: 16px; color: var(--tekst-svak); }
-  footer { margin-top: 36px; color: var(--tekst-svak); font-size: 0.85rem; }
+  /* ===== Hendelser ===== */
+  .hendelse { display: grid; grid-template-columns: 16px 1fr; gap: 4px 14px; padding: 18px 20px; border-top: 1px solid var(--kant); }
+  .hendelse:first-child { border-top: 0; }
+  .hendelse .prikk { grid-row: span 3; margin-top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--graa); justify-self: center; position: relative; }
+  .hendelse[data-type="nede"] .prikk { background: var(--rod); }
+  .hendelse[data-type="treg"] .prikk { background: var(--gul); }
+  .hendelse[data-paagaar="ja"] .prikk::after {
+    content: ""; position: absolute; inset: -5px; border-radius: 50%; border: 2px solid currentColor; opacity: 0;
+    animation: puls 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  }
+  .hendelse[data-type="nede"] .prikk::after { color: var(--rod); }
+  .hendelse[data-type="treg"] .prikk::after { color: var(--gul); }
+  .hendelse .tittel { font-weight: 600; }
+  .hendelse .tittel .type[data-type="nede"] { color: var(--rod); }
+  .hendelse .tittel .type[data-type="treg"] { color: var(--gul); }
+  .hendelse .naar { color: var(--tekst-svak); font-size: 0.88rem; }
+  .hendelse .naar .paagaar { color: var(--rod); font-weight: 600; }
+  .hendelse .aarsak { margin-top: 6px; font-size: 0.95rem; max-width: 65ch; }
+
+  .tom { display: flex; gap: 14px; align-items: flex-start; padding: 22px 20px; color: var(--tekst-svak); font-size: 0.95rem; }
+  .tom svg { width: 22px; height: 22px; flex: none; color: var(--gronn); margin-top: 1px; }
+  .tom b { color: var(--tekst); font-weight: 600; }
+  .tom p { margin: 2px 0 0; max-width: 60ch; }
+
+  /* ===== Laster ===== */
+  .skjelett .tjeneste { pointer-events: none; }
+  .skjelett .blokk { border-radius: 6px; background: var(--flate-2); animation: skimmer 1.6s ease-in-out infinite; }
+  @keyframes skimmer { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+
+  footer { margin-top: 44px; color: var(--tekst-svak); font-size: 0.88rem; display: flex; flex-direction: column; gap: 6px; max-width: 65ch; }
+  footer p { margin: 0; }
 
   @media (max-width: 480px) {
-    :root { --stolpe-h: 24px; }
+    :root { --stolpe-h: 26px; }
+    /* 90 stolper på ~330 px: 1 px luft er det som gjør at stolpene fortsatt er bredere enn lufta. */
     .stolper { gap: 1px; }
-    .oppetid { font-size: 0.75rem; }
+    .tjeneste { padding: 16px 16px 14px; }
+    .hendelse { padding: 16px; }
+    .oppetid { display: grid; grid-template-columns: repeat(3, auto); justify-content: space-between; gap: 8px; font-size: 0.78rem; }
+    .oppetid .dager::after { content: " d"; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .live .puls::after, .hendelse .prikk::after, .skjelett .blokk { animation: none; }
+    .stolpe, .samlet { transition: none; }
   }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <h1>
-      <!-- brand-logo-light.svg har mørk fyll (til lys bakgrunn), brand-logo-dark.svg hvit (til mørk). -->
+    <p class="merkevare">
+      <!-- brand-logo-light.svg har navy fyll (til lys bakgrunn), brand-logo-dark.svg hvit (til mørk). -->
       <picture>
         <source srcset="brand/brand-logo-dark.svg" media="(prefers-color-scheme: dark)">
         <img src="brand/brand-logo-light.svg" alt="Flowment" width="166" height="40">
       </picture>
-      <span>driftsstatus</span>
-    </h1>
-    <div id="oppdatert">Henter status …</div>
+      <span class="skille" aria-hidden="true"></span>
+      <span class="tittel">Driftsstatus</span>
+    </p>
+    <div class="live" id="live" data-modus="laster">
+      <span class="puls" aria-hidden="true"></span>
+      <span id="oppdatert">Henter status …</span>
+    </div>
   </header>
 
-  <div class="banner" id="banner" data-samlet="ukjent" role="status" aria-live="polite">
-    <span class="prikk" aria-hidden="true"></span>
-    <span id="banner-tekst">Henter status …</span>
+  <div class="samlet" id="samlet" data-samlet="ukjent" role="status" aria-live="polite">
+    <span class="ikon" aria-hidden="true">
+      <svg id="ikon-oppe" hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      <svg id="ikon-treg" hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+      <svg id="ikon-nede" hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v8"/><circle cx="12" cy="17.5" r="1.1" fill="currentColor" stroke="none"/></svg>
+      <svg id="ikon-ukjent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9.5a3 3 0 1 1 4.2 2.75c-.8.35-1.2.9-1.2 1.75v.5"/><circle cx="12" cy="17.5" r="1.1" fill="currentColor" stroke="none"/></svg>
+    </span>
+    <h1 id="samlet-tittel">Henter status …</h1>
+    <p id="samlet-tekst">Et øyeblikk, vi spør driftsvakta.</p>
   </div>
-  <div id="reserve" role="alert"></div>
+  <div id="reserve" role="alert">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 2.8 19.5h18.4L12 3.5z"/><path d="M12 9.5v4.5"/><circle cx="12" cy="16.8" r=".9" fill="currentColor" stroke="none"/></svg>
+    <span id="reserve-tekst"></span>
+  </div>
 
   <section aria-labelledby="h-tjenester">
-    <h2 id="h-tjenester">Tjenester</h2>
-    <div class="kort" id="tjenester"></div>
+    <div class="seksjonstopp">
+      <h2 id="h-tjenester">Tjenester</h2>
+      <span class="hint">Oppetid siste 90 dager, én stolpe per dag</span>
+    </div>
+    <div class="kort skjelett" id="tjenester"></div>
   </section>
 
   <section aria-labelledby="h-hendelser">
-    <h2 id="h-hendelser">Hendelser</h2>
-    <div class="kort" id="hendelser"><div class="tom">Ingen hendelser registrert.</div></div>
+    <div class="seksjonstopp">
+      <h2 id="h-hendelser">Hendelser</h2>
+      <span class="hint">Siste 90 dager</span>
+    </div>
+    <div class="kort" id="hendelser"></div>
   </section>
 
   <footer>
-    Tjenestene sjekkes hvert minutt fra driftsvakta til Flowment. Sida oppdaterer seg selv hvert minutt.
-    Spørsmål? <a href="https://flowment.no/">flowment.no</a>
+    <p>Hver tjeneste sjekkes hvert minutt fra Flowment sin egen driftsvakt. En tjeneste regnes som nede etter tre feil på rad, og som oppe igjen etter to gode svar. Sida oppdaterer seg selv.</p>
+    <p>Spørsmål om driften? <a href="https://flowment.no/">flowment.no</a></p>
   </footer>
 </main>
+<div id="tips" role="tooltip" aria-hidden="true"></div>
 
 <script>
 (function () {
@@ -202,23 +336,19 @@
   var RESERVE = "./status.json";
   var INTERVALL_MS = 60000;
   var DAGER = 90;
+  var OSLO = "Europe/Oslo";
 
   var TILSTAND_TEKST = { oppe: "Oppe", treg: "Treg", nede: "Nede", ukjent: "Ukjent" };
-  var SAMLET_TEKST = {
-    oppe: "Alle systemer er oppe",
-    treg: "Redusert ytelse på enkelte tjenester",
-    nede: "Nedetid på enkelte tjenester",
-    ukjent: "Status er ukjent",
-  };
   var TYPE_TEKST = { nede: "Nedetid", treg: "Redusert ytelse" };
 
-  var fmtKlokke = new Intl.DateTimeFormat("nb-NO", { timeZone: "Europe/Oslo", hour: "2-digit", minute: "2-digit" });
-  var fmtDato = new Intl.DateTimeFormat("nb-NO", { timeZone: "Europe/Oslo", day: "2-digit", month: "2-digit", year: "numeric" });
-  var fmtDatoKort = new Intl.DateTimeFormat("nb-NO", { timeZone: "Europe/Oslo", day: "numeric", month: "short" });
+  var fmtKlokke = new Intl.DateTimeFormat("nb-NO", { timeZone: OSLO, hour: "2-digit", minute: "2-digit" });
+  var fmtDatoKort = new Intl.DateTimeFormat("nb-NO", { timeZone: OSLO, day: "numeric", month: "short" });
+  var fmtDatoLang = new Intl.DateTimeFormat("nb-NO", { timeZone: OSLO, weekday: "long", day: "numeric", month: "long" });
+  var fmtIsoDag = new Intl.DateTimeFormat("sv-SE", { timeZone: OSLO, year: "numeric", month: "2-digit", day: "2-digit" });
 
   function klokke(iso) { return iso ? fmtKlokke.format(new Date(iso)) : "–"; }
-  function dato(iso) { return iso ? fmtDato.format(new Date(iso)) : "–"; }
-  function datoOgKlokke(iso) { return iso ? fmtDatoKort.format(new Date(iso)) + " kl. " + klokke(iso) : "–"; }
+  function datoKort(iso) { return iso ? fmtDatoKort.format(new Date(iso)) : "–"; }
+  function datoOgKlokke(iso) { return iso ? datoKort(iso) + " kl. " + klokke(iso) : "–"; }
 
   // Samme regler som formaterVarighet i admin, så tallene stemmer med Telegram-meldingene.
   function varighet(fraIso, tilIso) {
@@ -237,6 +367,11 @@
     return p.toLocaleString("nb-NO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " %";
   }
 
+  function listeOrd(navn) {
+    if (navn.length <= 1) return navn.join("");
+    return navn.slice(0, -1).join(", ") + " og " + navn[navn.length - 1];
+  }
+
   function el(tag, cls, tekst) {
     var e = document.createElement(tag);
     if (cls) e.className = cls;
@@ -244,42 +379,73 @@
     return e;
   }
 
-  // Dagene i drift_dag er UTC-datoer (YYYY-MM-DD). Vi lager 90 plasser med samme nøkkel,
-  // eldste først, så en dag uten data blir en grå stolpe i stedet for et hull.
+  // drift_dag summerer per norsk dato (Europe/Oslo), så stolpene må skjæres på samme dato,
+  // ikke UTC: ellers mangler dagens stolpe mellom midnatt og 02:00. sv-SE gir ISO-formatet.
   function dagNokler() {
     var ut = [];
-    var naa = new Date();
-    for (var i = DAGER - 1; i >= 0; i--) {
-      var d = new Date(Date.UTC(naa.getUTCFullYear(), naa.getUTCMonth(), naa.getUTCDate() - i));
-      ut.push(d.toISOString().slice(0, 10));
-    }
+    var naa = Date.now();
+    for (var i = DAGER - 1; i >= 0; i--) ut.push(fmtIsoDag.format(new Date(naa - i * 86400000)));
     return ut;
   }
 
-  function datoFraNokkel(n) {
-    var deler = n.split("-");
-    return deler[2] + "." + deler[1] + "." + deler[0];
-  }
+  function dagTekst(n) { return fmtDatoLang.format(new Date(n + "T12:00:00Z")); }
 
-  function stolperad(dager) {
+  // ===== Verktøytips for stolpene =====
+  var tips = document.getElementById("tips");
+  function visTips(stolpe, x, y) {
+    tips.textContent = "";
+    tips.appendChild(el("b", null, stolpe.dataset.dato));
+    tips.appendChild(document.createElement("br"));
+    tips.appendChild(document.createTextNode(stolpe.dataset.linje1));
+    if (stolpe.dataset.linje2) {
+      tips.appendChild(document.createElement("br"));
+      tips.appendChild(el("span", "under", stolpe.dataset.linje2));
+    }
+    tips.classList.add("vis");
+    flyttTips(x, y);
+  }
+  function flyttTips(x, y) {
+    var b = tips.getBoundingClientRect();
+    var halv = b.width / 2 + 8;
+    var cx = Math.max(halv, Math.min(window.innerWidth - halv, x));
+    tips.style.left = cx + "px";
+    tips.style.top = Math.max(b.height + 12, y) + "px";
+  }
+  function skjulTips() { tips.classList.remove("vis"); }
+
+  function stolperad(dager, navn) {
     var kart = {};
     (dager || []).forEach(function (d) { kart[d.dag] = d; });
     var rad = el("div", "stolper");
     rad.setAttribute("role", "img");
-    rad.setAttribute("aria-label", "Oppetid per dag de siste " + DAGER + " dagene");
+    var medData = 0, sumOk = 0, sumSjekker = 0;
     dagNokler().forEach(function (n) {
       var d = kart[n];
       var s = el("div", "stolpe");
+      s.dataset.dato = dagTekst(n);
       if (!d || !d.sjekker) {
         s.dataset.niv = "ingen";
-        s.title = datoFraNokkel(n) + " · ingen data";
+        s.dataset.linje1 = "Ingen målinger";
       } else {
+        medData++; sumOk += d.ok; sumSjekker += d.sjekker;
         var p = (d.ok / d.sjekker) * 100;
         s.dataset.niv = p >= 99.9 ? "gronn" : p >= 99 ? "gul" : "rod";
-        s.title = datoFraNokkel(n) + " · " + prosent(p) + (d.trege ? " · " + d.trege + " trege sjekker" : "");
+        s.dataset.linje1 = prosent(p) + " oppe";
+        s.dataset.linje2 = d.ok + " av " + d.sjekker + " sjekker" + (d.trege ? ", " + d.trege + " trege" : "");
       }
       rad.appendChild(s);
     });
+    rad.setAttribute("aria-label", navn + ": oppetid per dag de siste " + DAGER + " dagene, "
+      + (medData ? medData + " dager med målinger, " + prosent(sumSjekker ? (sumOk / sumSjekker) * 100 : null) + " samlet" : "ingen målinger ennå"));
+    rad.addEventListener("pointerover", function (e) {
+      var t = e.target.closest(".stolpe");
+      if (t) { var r = t.getBoundingClientRect(); visTips(t, r.left + r.width / 2, r.top); }
+    });
+    rad.addEventListener("pointermove", function (e) {
+      var t = e.target.closest(".stolpe");
+      if (t && tips.classList.contains("vis")) { var r = t.getBoundingClientRect(); flyttTips(r.left + r.width / 2, r.top); }
+    });
+    rad.addEventListener("pointerleave", skjulTips);
     return rad;
   }
 
@@ -290,17 +456,28 @@
     if ((t.tilstand === "nede" || t.tilstand === "treg") && t.siden) {
       navn.appendChild(el("span", "siden", "siden " + datoOgKlokke(t.siden)));
     }
+    var hoyre = el("div", "hoyre");
+    var o = t.oppetid || {};
     var merke = el("span", "merke", TILSTAND_TEKST[t.tilstand] || TILSTAND_TEKST.ukjent);
     merke.dataset.tilstand = t.tilstand || "ukjent";
+    hoyre.appendChild(merke);
     topp.appendChild(navn);
-    topp.appendChild(merke);
+    topp.appendChild(hoyre);
     rad.appendChild(topp);
-    rad.appendChild(stolperad(t.dager));
+    rad.appendChild(stolperad(t.dager, t.navn));
 
-    var o = t.oppetid || {};
-    var opp = el("div", "oppetid");
-    [["7 dager", o.d7], ["30 dager", o.d30], ["90 dager", o.d90]].forEach(function (par) {
-      var s = el("span", null, par[0] + ": ");
+    var akse = el("div", "akse");
+    akse.appendChild(el("span", null, "90 dager siden"));
+    akse.appendChild(el("span", "linje"));
+    akse.appendChild(el("span", null, "i dag"));
+    rad.appendChild(akse);
+
+    var opp = el("div", "oppetid tall");
+    [["7", o.d7], ["30", o.d30], ["90", o.d90]].forEach(function (par) {
+      var s = el("span");
+      // «7 dager» på brede skjermer, «7 d» på smale: ordet legges på i CSS (.dager::after).
+      s.appendChild(el("span", "dager", par[0]));
+      s.appendChild(document.createTextNode(" "));
       s.appendChild(el("b", null, prosent(par[1])));
       opp.appendChild(s);
     });
@@ -310,54 +487,149 @@
 
   function hendelseRad(h, naa) {
     var rad = el("div", "hendelse");
-    var l1 = el("div", "linje1");
+    rad.dataset.type = h.type;
+    rad.dataset.paagaar = h.avsluttet ? "nei" : "ja";
+    rad.appendChild(el("span", "prikk"));
+    var tittel = el("div", "tittel");
     var type = el("span", "type", TYPE_TEKST[h.type] || h.type);
     type.dataset.type = h.type;
-    l1.appendChild(type);
-    l1.appendChild(el("span", null, (h.tjenester || []).join(", ") || "–"));
-    var naar = el("span", "naar");
+    tittel.appendChild(type);
+    tittel.appendChild(document.createTextNode(": " + (listeOrd(h.tjenester || []) || "ukjent tjeneste")));
+    rad.appendChild(tittel);
+    var naar = el("div", "naar tall");
     if (h.avsluttet) {
-      naar.textContent = dato(h.startet) + " " + klokke(h.startet) + "–" + klokke(h.avsluttet) + " · " + varighet(h.startet, h.avsluttet);
+      naar.textContent = datoKort(h.startet) + " kl. " + klokke(h.startet) + "–" + klokke(h.avsluttet) + " · varte " + varighet(h.startet, h.avsluttet);
     } else {
-      naar.textContent = "startet " + dato(h.startet) + " " + klokke(h.startet) + " · ";
-      naar.appendChild(el("span", "paagaar", "pågår (" + varighet(h.startet, naa) + ")"));
+      naar.textContent = "Startet " + datoKort(h.startet) + " kl. " + klokke(h.startet) + " · ";
+      naar.appendChild(el("span", "paagaar", "pågår, " + varighet(h.startet, naa)));
     }
-    l1.appendChild(naar);
-    rad.appendChild(l1);
+    rad.appendChild(naar);
     if (h.aarsak) rad.appendChild(el("div", "aarsak", h.aarsak));
     return rad;
   }
 
+  function tomHendelser(tekst, undertekst) {
+    var t = el("div", "tom");
+    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("stroke", "currentColor");
+    svg.setAttribute("stroke-width", "2");
+    svg.setAttribute("stroke-linecap", "round");
+    svg.setAttribute("stroke-linejoin", "round");
+    svg.setAttribute("aria-hidden", "true");
+    var c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+    c.setAttribute("cx", "12"); c.setAttribute("cy", "12"); c.setAttribute("r", "9");
+    var p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    p.setAttribute("d", "M8 12.5l2.7 2.7L16 9.8");
+    svg.appendChild(c); svg.appendChild(p);
+    t.appendChild(svg);
+    var tekstboks = el("div");
+    tekstboks.appendChild(el("b", null, tekst));
+    tekstboks.appendChild(el("p", null, undertekst));
+    t.appendChild(tekstboks);
+    return t;
+  }
+
+  // SVG-elementer har ikke `hidden`-egenskapen i JS (den er HTMLElement sin), så attributtet
+  // settes eksplisitt.
+  function visIkon(samlet) {
+    ["oppe", "treg", "nede", "ukjent"].forEach(function (n) {
+      var svg = document.getElementById("ikon-" + n);
+      if (n === samlet) svg.removeAttribute("hidden"); else svg.setAttribute("hidden", "");
+    });
+  }
+
+  function samletTekst(samlet, tjenester, hendelser) {
+    var nede = tjenester.filter(function (t) { return t.tilstand === "nede"; }).map(function (t) { return t.navn; });
+    var trege = tjenester.filter(function (t) { return t.tilstand === "treg"; }).map(function (t) { return t.navn; });
+    var paagaar = hendelser.filter(function (h) { return !h.avsluttet; })[0];
+    if (samlet === "nede") {
+      return {
+        tittel: (nede.length === 1 ? "Nedetid på " : "Nedetid på ") + listeOrd(nede),
+        tekst: "Vi er varslet og jobber med saken" + (paagaar ? ", siden kl. " + klokke(paagaar.startet) : "") + ". "
+          + (tjenester.length - nede.length > 0 ? "De andre tjenestene er ikke berørt." : ""),
+      };
+    }
+    if (samlet === "treg") {
+      return {
+        tittel: "Redusert ytelse på " + listeOrd(trege),
+        tekst: "Tjenesten svarer, men tregere enn normalt. Alt annet er oppe.",
+      };
+    }
+    if (samlet === "oppe") {
+      return {
+        tittel: "Alle systemer er oppe",
+        tekst: "Ingen kjente problemer. " + (tjenester.length ? "Alle " + tjenester.length + " tjenester svarer som de skal." : ""),
+      };
+    }
+    return { tittel: "Status er ukjent", tekst: "Vi får ikke hentet ferske målinger akkurat nå. Prøver igjen om ett minutt." };
+  }
+
   function tegn(data, reserve) {
     var naa = new Date().toISOString();
+    var tjenester = data.tjenester || [];
+    var hendelser = (data.hendelser || []).slice(0, 20);
     var samlet = data.samlet || "ukjent";
     // Reservefila kan si «oppe» uten at noen tjeneste faktisk er sjekket (alle «ukjent»).
     // Da er ærlig svar «ukjent», ikke «alle systemer er oppe».
-    var noenKjent = (data.tjenester || []).some(function (t) { return t.tilstand && t.tilstand !== "ukjent"; });
+    var noenKjent = tjenester.some(function (t) { return t.tilstand && t.tilstand !== "ukjent"; });
     if (!noenKjent) samlet = "ukjent";
-    var banner = document.getElementById("banner");
-    banner.dataset.samlet = samlet;
-    document.getElementById("banner-tekst").textContent = SAMLET_TEKST[samlet] || SAMLET_TEKST.ukjent;
-    document.getElementById("oppdatert").textContent = "Sist oppdatert " + klokke(data.oppdatert || naa);
+
+    var boks = document.getElementById("samlet");
+    boks.dataset.samlet = samlet;
+    visIkon(samlet);
+    var tekst = samletTekst(samlet, tjenester, hendelser);
+    document.getElementById("samlet-tittel").textContent = tekst.tittel;
+    document.getElementById("samlet-tekst").textContent = tekst.tekst;
+
+    var live = document.getElementById("live");
+    live.dataset.modus = reserve ? "reserve" : "live";
+    document.getElementById("oppdatert").textContent = (reserve ? "Sist kjent " : "Oppdatert ") + klokke(data.oppdatert || naa);
 
     var reserveEl = document.getElementById("reserve");
     if (reserve) {
-      reserveEl.textContent = "Live-status er ikke tilgjengelig akkurat nå — viser sist kjente status fra " + klokke(data.oppdatert) + ".";
+      document.getElementById("reserve-tekst").textContent = "Live-status er ikke tilgjengelig akkurat nå. Dette er sist kjente status, fra kl. " + klokke(data.oppdatert) + ".";
       reserveEl.classList.add("vis");
     } else {
       reserveEl.classList.remove("vis");
     }
 
     var tj = document.getElementById("tjenester");
+    tj.classList.remove("skjelett");
     tj.textContent = "";
-    (data.tjenester || []).forEach(function (t) { tj.appendChild(tjenesteRad(t)); });
+    tjenester.forEach(function (t) { tj.appendChild(tjenesteRad(t)); });
     if (!tj.childNodes.length) tj.appendChild(el("div", "tom", "Ingen tjenester å vise."));
 
     var he = document.getElementById("hendelser");
     he.textContent = "";
-    var liste = (data.hendelser || []).slice(0, 20);
-    liste.forEach(function (h) { he.appendChild(hendelseRad(h, naa)); });
-    if (!liste.length) he.appendChild(el("div", "tom", "Ingen hendelser de siste 90 dagene."));
+    hendelser.forEach(function (h) { he.appendChild(hendelseRad(h, naa)); });
+    if (!hendelser.length) {
+      he.appendChild(tomHendelser("Ingen hendelser de siste 90 dagene",
+        "Nedetid og redusert ytelse dukker opp her med tidspunkt, varighet og årsak så snart driftsvakta registrerer noe."));
+    }
+  }
+
+  function skjelett() {
+    var tj = document.getElementById("tjenester");
+    for (var i = 0; i < 6; i++) {
+      var rad = el("div", "tjeneste");
+      var topp = el("div", "topp");
+      var n = el("div", "blokk"); n.style.width = (90 + (i % 3) * 30) + "px"; n.style.height = "16px";
+      var m = el("div", "blokk"); m.style.width = "64px"; m.style.height = "22px"; m.style.borderRadius = "999px";
+      topp.appendChild(n); topp.appendChild(m);
+      rad.appendChild(topp);
+      var s = el("div", "blokk"); s.style.height = "var(--stolpe-h)"; s.style.marginTop = "12px";
+      rad.appendChild(s);
+      var o = el("div", "blokk"); o.style.width = "220px"; o.style.height = "12px"; o.style.marginTop = "10px";
+      rad.appendChild(o);
+      tj.appendChild(rad);
+    }
+    var he = document.getElementById("hendelser");
+    var h = el("div", "tom");
+    var b = el("div", "blokk"); b.style.width = "260px"; b.style.height = "16px";
+    h.appendChild(b);
+    he.appendChild(h);
   }
 
   function hent(url, timeoutMs) {
@@ -371,6 +643,22 @@
       .finally(function () { if (timer) clearTimeout(timer); });
   }
 
+  function feilet() {
+    var boks = document.getElementById("samlet");
+    boks.dataset.samlet = "ukjent";
+    visIkon("ukjent");
+    document.getElementById("samlet-tittel").textContent = "Kunne ikke hente status";
+    document.getElementById("samlet-tekst").textContent = "Verken driftsvakta eller reserven svarte. Vi prøver igjen om ett minutt.";
+    document.getElementById("live").dataset.modus = "feil";
+    document.getElementById("oppdatert").textContent = "Prøver igjen om ett minutt";
+    document.getElementById("reserve-tekst").textContent = "Live-status er ikke tilgjengelig akkurat nå, og ingen reservestatus ble funnet.";
+    document.getElementById("reserve").classList.add("vis");
+    var tj = document.getElementById("tjenester");
+    if (tj.classList.contains("skjelett")) { tj.classList.remove("skjelett"); tj.textContent = ""; tj.appendChild(el("div", "tom", "Ingen tjenester å vise.")); }
+    var he = document.getElementById("hendelser");
+    if (!he.querySelector(".hendelse")) { he.textContent = ""; he.appendChild(el("div", "tom", "Ingen hendelser å vise.")); }
+  }
+
   function oppdater() {
     hent(API, 10000)
       .then(function (data) { tegn(data, false); })
@@ -379,23 +667,17 @@
         // så GitHub Pages / nettleseren ikke gir oss en gammel kopi.
         return hent(RESERVE + "?t=" + Date.now(), 10000)
           .then(function (data) { tegn(data, true); })
-          .catch(function () {
-            var banner = document.getElementById("banner");
-            banner.dataset.samlet = "ukjent";
-            document.getElementById("banner-tekst").textContent = "Kunne ikke hente status akkurat nå";
-            document.getElementById("oppdatert").textContent = "Prøver igjen om ett minutt";
-            var reserveEl = document.getElementById("reserve");
-            reserveEl.textContent = "Live-status er ikke tilgjengelig akkurat nå, og ingen reservestatus ble funnet.";
-            reserveEl.classList.add("vis");
-          });
+          .catch(feilet);
       });
   }
 
+  skjelett();
   oppdater();
   setInterval(oppdater, INTERVALL_MS);
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState === "visible") oppdater();
   });
+  window.addEventListener("scroll", skjulTips, { passive: true });
 })();
 </script>
 </body>
