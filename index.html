@@ -39,6 +39,9 @@
     --rod-kant: #EFC0C0;
     --graa: #C9D0D9;
     --graa-bg: #EEF1F4;
+    --blaa: #2F6F9D;
+    --blaa-bg: #E8F0F7;
+    --blaa-kant: #C5D8EA;
     --skygge: 0 1px 2px rgba(30, 42, 56, 0.06), 0 4px 16px rgba(30, 42, 56, 0.05);
     --stolpe-h: 32px;
     --radius: 12px;
@@ -67,6 +70,9 @@
       --rod-kant: #5F2C2C;
       --graa: #3E4C60;
       --graa-bg: #24313F;
+      --blaa: #7FB0FF;
+      --blaa-bg: #1B2F44;
+      --blaa-kant: #2C4A68;
       --skygge: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
     }
   }
@@ -92,6 +98,9 @@
     --rod-kant: #5F2C2C;
     --graa: #3E4C60;
     --graa-bg: #24313F;
+    --blaa: #7FB0FF;
+    --blaa-bg: #1B2F44;
+    --blaa-kant: #2C4A68;
     --skygge: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 20px rgba(0, 0, 0, 0.25);
   }
 
@@ -158,6 +167,26 @@
     .samlet .ikon { width: 38px; height: 38px; }
     .samlet h1 { font-size: 1.2rem; }
   }
+
+  /* Planlagt vedlikehold: info-blått, aldri rødt. Det er poenget med å planlegge. */
+  .samlet[data-samlet="planlagt"] { background: var(--blaa-bg); border-color: var(--blaa-kant); }
+  .samlet[data-samlet="planlagt"] .ikon { background: var(--blaa); color: #fff; }
+  .samlet[data-samlet="planlagt"] p { color: color-mix(in srgb, var(--blaa) 70%, var(--tekst)); }
+  #vedlikehold { display: none; margin-top: 12px; }
+  #vedlikehold.vis { display: grid; gap: 8px; }
+  .vedlikehold {
+    display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: start;
+    padding: 12px 16px; border-radius: 10px; background: var(--flate); border: 1px solid var(--blaa-kant); font-size: 0.92rem;
+  }
+  .vedlikehold[data-paagaar="ja"] { background: var(--blaa-bg); }
+  .vedlikehold svg { width: 18px; height: 18px; color: var(--blaa); margin-top: 2px; grid-row: span 3; }
+  .vedlikehold b { font-weight: 600; }
+  .vedlikehold .naar { color: var(--tekst-svak); font-size: 0.85rem; }
+  .vedlikehold .tekst { margin-top: 4px; font-size: 0.9rem; max-width: 65ch; white-space: pre-wrap; }
+  .merke[data-tilstand="vedlikehold"] { background: var(--blaa-bg); color: var(--blaa); }
+  .merke[data-tilstand="vedlikehold"]::before { background: var(--blaa); }
+  .hendelse[data-type="planlagt"] .prikk { background: var(--blaa); }
+  .hendelse .tittel .type[data-type="planlagt"] { color: var(--blaa); }
 
   #reserve {
     display: none; margin-top: 12px; padding: 12px 16px; border-radius: 10px;
@@ -293,11 +322,13 @@
       <svg id="ikon-oppe" hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
       <svg id="ikon-treg" hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
       <svg id="ikon-nede" hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v8"/><circle cx="12" cy="17.5" r="1.1" fill="currentColor" stroke="none"/></svg>
+      <svg id="ikon-planlagt" hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6.5a4 4 0 0 0 5 5l-8 8a2.1 2.1 0 0 1-3-3l8-8z"/><path d="M6 9l-2-2 2-2 2 2"/></svg>
       <svg id="ikon-ukjent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 9.5a3 3 0 1 1 4.2 2.75c-.8.35-1.2.9-1.2 1.75v.5"/><circle cx="12" cy="17.5" r="1.1" fill="currentColor" stroke="none"/></svg>
     </span>
     <h1 id="samlet-tittel">Henter status …</h1>
     <p id="samlet-tekst">Et øyeblikk, vi spør driftsvakta.</p>
   </div>
+  <div id="vedlikehold" aria-live="polite"></div>
   <div id="reserve" role="alert">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 2.8 19.5h18.4L12 3.5z"/><path d="M12 9.5v4.5"/><circle cx="12" cy="16.8" r=".9" fill="currentColor" stroke="none"/></svg>
     <span id="reserve-tekst"></span>
@@ -338,8 +369,8 @@
   var DAGER = 90;
   var OSLO = "Europe/Oslo";
 
-  var TILSTAND_TEKST = { oppe: "Oppe", treg: "Treg", nede: "Nede", ukjent: "Ukjent" };
-  var TYPE_TEKST = { nede: "Nedetid", treg: "Redusert ytelse" };
+  var TILSTAND_TEKST = { oppe: "Oppe", treg: "Treg", nede: "Nede", ukjent: "Ukjent", vedlikehold: "Vedlikehold" };
+  var TYPE_TEKST = { nede: "Nedetid", treg: "Redusert ytelse", planlagt: "Planlagt vedlikehold" };
 
   var fmtKlokke = new Intl.DateTimeFormat("nb-NO", { timeZone: OSLO, hour: "2-digit", minute: "2-digit" });
   var fmtDatoKort = new Intl.DateTimeFormat("nb-NO", { timeZone: OSLO, day: "numeric", month: "short" });
@@ -349,6 +380,11 @@
   function klokke(iso) { return iso ? fmtKlokke.format(new Date(iso)) : "–"; }
   function datoKort(iso) { return iso ? fmtDatoKort.format(new Date(iso)) : "–"; }
   function datoOgKlokke(iso) { return iso ? datoKort(iso) + " kl. " + klokke(iso) : "–"; }
+  // «30. sep. kl. 22:00–23:00», eller begge datoene når tidsrommet går over midnatt.
+  function tidsrom(fra, til) {
+    if (fmtIsoDag.format(new Date(fra)) === fmtIsoDag.format(new Date(til))) return datoKort(fra) + " kl. " + klokke(fra) + "–" + klokke(til);
+    return datoKort(fra) + " kl. " + klokke(fra) + " – " + datoKort(til) + " kl. " + klokke(til);
+  }
 
   // Samme regler som formaterVarighet i admin, så tallene stemmer med Telegram-meldingene.
   function varighet(fraIso, tilIso) {
@@ -431,8 +467,12 @@
         var p = (d.ok / d.sjekker) * 100;
         s.dataset.niv = p >= 99.9 ? "gronn" : p >= 99 ? "gul" : "rod";
         s.dataset.linje1 = prosent(p) + " oppe";
-        s.dataset.linje2 = d.ok + " av " + d.sjekker + " sjekker" + (d.trege ? ", " + d.trege + " trege" : "");
+        var ekstra = [];
+        if (d.trege) ekstra.push(d.trege + " trege");
+        if (d.planlagt) ekstra.push(d.planlagt + " under planlagt vedlikehold");
+        s.dataset.linje2 = d.ok + " av " + d.sjekker + " sjekker" + (ekstra.length ? ", " + ekstra.join(", ") : "");
       }
+      if ((!d || !d.sjekker) && d && d.planlagt) s.dataset.linje1 = "Planlagt vedlikehold (" + d.planlagt + " sjekker)";
       rad.appendChild(s);
     });
     rad.setAttribute("aria-label", navn + ": oppetid per dag de siste " + DAGER + " dagene, "
@@ -458,8 +498,10 @@
     }
     var hoyre = el("div", "hoyre");
     var o = t.oppetid || {};
-    var merke = el("span", "merke", TILSTAND_TEKST[t.tilstand] || TILSTAND_TEKST.ukjent);
-    merke.dataset.tilstand = t.tilstand || "ukjent";
+    // I et planlagt vindu vises «Vedlikehold» i stedet for nede/treg: det er planlagt.
+    var tilstand = t.vedlikehold && t.tilstand !== "oppe" ? "vedlikehold" : t.tilstand || "ukjent";
+    var merke = el("span", "merke", TILSTAND_TEKST[tilstand] || TILSTAND_TEKST.ukjent);
+    merke.dataset.tilstand = tilstand;
     hoyre.appendChild(merke);
     topp.appendChild(navn);
     topp.appendChild(hoyre);
@@ -508,6 +550,52 @@
     return rad;
   }
 
+  // Gjennomført vedlikehold i tidslinja: samme rad som en hendelse, blå prikk.
+  function vedlikeholdRad(v) {
+    var rad = el("div", "hendelse");
+    rad.dataset.type = "planlagt";
+    rad.dataset.paagaar = "nei";
+    rad.appendChild(el("span", "prikk"));
+    var tittel = el("div", "tittel");
+    var type = el("span", "type", TYPE_TEKST.planlagt);
+    type.dataset.type = "planlagt";
+    tittel.appendChild(type);
+    tittel.appendChild(document.createTextNode(": " + v.tittel + (v.tjenester.length ? " (" + listeOrd(v.tjenester) + ")" : "")));
+    rad.appendChild(tittel);
+    rad.appendChild(el("div", "naar tall", tidsrom(v.starter, v.slutter) + " · varte " + varighet(v.starter, v.slutter)));
+    if (v.beskrivelse) rad.appendChild(el("div", "aarsak", v.beskrivelse));
+    return rad;
+  }
+
+  // Blokka under samlet status: det som pågår, og det som kommer.
+  function tegnVedlikehold(liste, naa) {
+    var boks = document.getElementById("vedlikehold");
+    boks.textContent = "";
+    var vis = liste.filter(function (v) { return v.paagaar || v.starter > naa; })
+      .sort(function (a, b) { return a.starter < b.starter ? -1 : 1; });
+    vis.forEach(function (v) {
+      var rad = el("div", "vedlikehold");
+      rad.dataset.paagaar = v.paagaar ? "ja" : "nei";
+      var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "0 0 24 24"); svg.setAttribute("fill", "none"); svg.setAttribute("stroke", "currentColor");
+      svg.setAttribute("stroke-width", "2"); svg.setAttribute("stroke-linecap", "round"); svg.setAttribute("stroke-linejoin", "round"); svg.setAttribute("aria-hidden", "true");
+      var p1 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      p1.setAttribute("d", "M14.5 6.5a4 4 0 0 0 5 5l-8 8a2.1 2.1 0 0 1-3-3l8-8z");
+      var p2 = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      p2.setAttribute("d", "M6 9l-2-2 2-2 2 2");
+      svg.appendChild(p1); svg.appendChild(p2);
+      rad.appendChild(svg);
+      var linje = el("div");
+      linje.appendChild(el("b", null, (v.paagaar ? "Pågår: " : "Planlagt: ") + (v.kilde === "deploy" ? "Deploy" : v.tittel)));
+      if (v.tjenester.length) linje.appendChild(document.createTextNode(" · " + listeOrd(v.tjenester)));
+      rad.appendChild(linje);
+      rad.appendChild(el("div", "naar tall", tidsrom(v.starter, v.slutter) + (v.paagaar ? " · " + varighet(naa, v.slutter) + " igjen" : "")));
+      if (v.beskrivelse) rad.appendChild(el("div", "tekst", v.beskrivelse));
+      boks.appendChild(rad);
+    });
+    boks.classList.toggle("vis", vis.length > 0);
+  }
+
   function tomHendelser(tekst, undertekst) {
     var t = el("div", "tom");
     var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -534,16 +622,23 @@
   // SVG-elementer har ikke `hidden`-egenskapen i JS (den er HTMLElement sin), så attributtet
   // settes eksplisitt.
   function visIkon(samlet) {
-    ["oppe", "treg", "nede", "ukjent"].forEach(function (n) {
+    ["oppe", "treg", "nede", "planlagt", "ukjent"].forEach(function (n) {
       var svg = document.getElementById("ikon-" + n);
       if (n === samlet) svg.removeAttribute("hidden"); else svg.setAttribute("hidden", "");
     });
   }
 
-  function samletTekst(samlet, tjenester, hendelser) {
-    var nede = tjenester.filter(function (t) { return t.tilstand === "nede"; }).map(function (t) { return t.navn; });
-    var trege = tjenester.filter(function (t) { return t.tilstand === "treg"; }).map(function (t) { return t.navn; });
+  function samletTekst(samlet, tjenester, hendelser, aktive) {
+    var nede = tjenester.filter(function (t) { return t.tilstand === "nede" && !t.vedlikehold; }).map(function (t) { return t.navn; });
+    var trege = tjenester.filter(function (t) { return t.tilstand === "treg" && !t.vedlikehold; }).map(function (t) { return t.navn; });
     var paagaar = hendelser.filter(function (h) { return !h.avsluttet; })[0];
+    if (samlet === "planlagt") {
+      var v = aktive[0];
+      return {
+        tittel: "Planlagt vedlikehold pågår",
+        tekst: v.tittel + " · til kl. " + klokke(v.slutter) + ". " + (v.tjenester.length ? listeOrd(v.tjenester) + " kan være utilgjengelig imens." : "") + " Alt annet er oppe.",
+      };
+    }
     if (samlet === "nede") {
       return {
         tittel: (nede.length === 1 ? "Nedetid på " : "Nedetid på ") + listeOrd(nede),
@@ -575,11 +670,17 @@
     // Da er ærlig svar «ukjent», ikke «alle systemer er oppe».
     var noenKjent = tjenester.some(function (t) { return t.tilstand && t.tilstand !== "ukjent"; });
     if (!noenKjent) samlet = "ukjent";
+    // Planlagt vedlikehold som pågår: info-blått i stedet for grønt, så lenge ingenting
+    // annet er galt. Deploy-vinduer får bare merket på tjenesten, ikke hele blokka.
+    var vedlikehold = data.vedlikehold || [];
+    var aktive = vedlikehold.filter(function (v) { return v.paagaar && v.kilde !== "deploy"; });
+    if (samlet === "oppe" && aktive.length) samlet = "planlagt";
 
     var boks = document.getElementById("samlet");
     boks.dataset.samlet = samlet;
     visIkon(samlet);
-    var tekst = samletTekst(samlet, tjenester, hendelser);
+    var tekst = samletTekst(samlet, tjenester, hendelser, aktive);
+    tegnVedlikehold(vedlikehold, naa);
     document.getElementById("samlet-tittel").textContent = tekst.tittel;
     document.getElementById("samlet-tekst").textContent = tekst.tekst;
 
@@ -603,8 +704,13 @@
 
     var he = document.getElementById("hendelser");
     he.textContent = "";
-    hendelser.forEach(function (h) { he.appendChild(hendelseRad(h, naa)); });
-    if (!hendelser.length) {
+    // Gjennomført vedlikehold går inn i tidslinja sammen med hendelsene, nyeste først.
+    var tidslinje = hendelser.map(function (h) { return { tid: h.startet, h: h }; })
+      .concat(vedlikehold.filter(function (v) { return v.kilde !== "deploy" && !v.paagaar && v.slutter <= naa; })
+        .map(function (v) { return { tid: v.starter, v: v }; }))
+      .sort(function (a, b) { return a.tid < b.tid ? 1 : -1; });
+    tidslinje.forEach(function (rad) { he.appendChild(rad.h ? hendelseRad(rad.h, naa) : vedlikeholdRad(rad.v)); });
+    if (!tidslinje.length) {
       he.appendChild(tomHendelser("Ingen hendelser de siste 90 dagene",
         "Nedetid og redusert ytelse dukker opp her med tidspunkt, varighet og årsak så snart driftsvakta registrerer noe."));
     }
