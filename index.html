@@ -124,13 +124,37 @@
   @media (min-width: 640px) { main { padding: 40px 24px 72px; } }
 
   /* ===== Topp ===== */
-  header { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; margin-bottom: 28px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 14px 24px; flex-wrap: wrap; margin-bottom: 28px; }
   .merkevare { display: flex; align-items: center; gap: 12px; margin: 0; }
   .merkevare picture, .merkevare img { display: block; }
   .merkevare img { height: 30px; width: auto; }
   .merkevare .skille { width: 1px; height: 22px; background: var(--kant-sterk); }
   .merkevare .tittel { font-size: 1rem; font-weight: 500; color: var(--tekst-svak); letter-spacing: -0.005em; }
 
+  .hoyre { display: flex; align-items: center; gap: 10px 18px; flex-wrap: wrap; }
+  .lenker { display: flex; gap: 8px; }
+  .knapp {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 999px; font-size: 0.88rem; font-weight: 600; line-height: 1.2;
+    text-decoration: none; color: var(--tekst); background: var(--flate); border: 1px solid var(--kant-sterk);
+    box-shadow: 0 1px 2px rgba(30, 42, 56, 0.06);
+    transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 160ms ease, background-color 160ms ease, border-color 160ms ease;
+  }
+  .knapp svg { width: 14px; height: 14px; transition: transform 160ms cubic-bezier(0.16, 1, 0.3, 1); }
+  .knapp:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(30, 42, 56, 0.12); border-color: var(--teal); text-decoration: none; }
+  .knapp:hover svg { transform: translate(1px, -1px); }
+  .knapp:active { transform: translateY(0); box-shadow: 0 1px 2px rgba(30, 42, 56, 0.08); }
+  .knapp--primaer { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .knapp--primaer:hover { background: #266B77; border-color: #266B77; }
+  :root[data-theme="dark"] .knapp--primaer:hover { background: #6CC0CC; border-color: #6CC0CC; color: #0F1A22; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .knapp--primaer { color: #0F1A22; }
+    :root:not([data-theme="light"]) .knapp--primaer:hover { background: #6CC0CC; border-color: #6CC0CC; color: #0F1A22; }
+  }
+  @media (max-width: 480px) {
+    .hoyre { width: 100%; justify-content: space-between; }
+    .knapp { padding: 8px 12px; font-size: 0.84rem; }
+  }
   .live { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--tekst-svak); }
   .live .puls { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--graa); flex: none; }
   .live[data-modus="live"] .puls { background: var(--teal); }
@@ -311,9 +335,21 @@
       <span class="skille" aria-hidden="true"></span>
       <span class="tittel">Driftsstatus</span>
     </p>
-    <div class="live" id="live" data-modus="laster">
-      <span class="puls" aria-hidden="true"></span>
-      <span id="oppdatert">Henter status …</span>
+    <div class="hoyre">
+      <div class="live" id="live" data-modus="laster">
+        <span class="puls" aria-hidden="true"></span>
+        <span id="oppdatert">Henter status …</span>
+      </div>
+      <nav class="lenker" aria-label="Flowment">
+        <a class="knapp" href="https://flowment.no/">
+          Nettsiden
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
+        </a>
+        <a class="knapp knapp--primaer" href="https://app.flowment.no/">
+          Åpne plattformen
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg>
+        </a>
+      </nav>
     </div>
   </header>
 
@@ -352,7 +388,7 @@
 
   <footer>
     <p>Hver tjeneste sjekkes hvert minutt fra Flowment sin egen driftsvakt. En tjeneste regnes som nede etter tre feil på rad, og som oppe igjen etter to gode svar. Sida oppdaterer seg selv.</p>
-    <p>Spørsmål om driften? <a href="https://flowment.no/">flowment.no</a></p>
+    <p>Spørsmål om driften? Ta kontakt via <a href="https://flowment.no/">flowment.no</a>.</p>
   </footer>
 </main>
 <div id="tips" role="tooltip" aria-hidden="true"></div>
