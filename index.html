@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Driftsstatus for Flowment: plattformen, nettsiden, database, møter, e-post og video. Oppdateres hvert minutt.">
+<meta name="color-scheme" content="light dark">
+<title>Flowment driftsstatus</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='6' fill='%2322a06b'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --flate: #ffffff;
+    --kant: #e2e5ea;
+    --tekst: #1b1f24;
+    --tekst-svak: #5c6572;
+    --gronn: #22a06b;
+    --gronn-bg: #e4f5ec;
+    --gul: #d9930d;
+    --gul-bg: #fcf1d8;
+    --rod: #d64545;
+    --rod-bg: #fbe4e4;
+    --graa: #c5cad2;
+    --graa-bg: #eef0f3;
+    --varsel-bg: #fcf1d8;
+    --varsel-kant: #e9c77a;
+    --lenke: #1f5fbf;
+    --stolpe-h: 30px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1216;
+      --flate: #171b21;
+      --kant: #2a3038;
+      --tekst: #e8ebef;
+      --tekst-svak: #98a2b0;
+      --gronn: #3ec48a;
+      --gronn-bg: #143126;
+      --gul: #e8b13c;
+      --gul-bg: #3a2d10;
+      --rod: #f06a6a;
+      --rod-bg: #3d1a1a;
+      --graa: #3a414b;
+      --graa-bg: #20252c;
+      --varsel-bg: #3a2d10;
+      --varsel-kant: #6b5220;
+      --lenke: #7fb0ff;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1216;
+    --flate: #171b21;
+    --kant: #2a3038;
+    --tekst: #e8ebef;
+    --tekst-svak: #98a2b0;
+    --gronn: #3ec48a;
+    --gronn-bg: #143126;
+    --gul: #e8b13c;
+    --gul-bg: #3a2d10;
+    --rod: #f06a6a;
+    --rod-bg: #3d1a1a;
+    --graa: #3a414b;
+    --graa-bg: #20252c;
+    --varsel-bg: #3a2d10;
+    --varsel-kant: #6b5220;
+    --lenke: #7fb0ff;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--tekst);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  a { color: var(--lenke); }
+  main { max-width: 860px; margin: 0 auto; padding: 24px 16px 48px; }
+
+  header { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 16px; margin-bottom: 16px; }
+  h1 { font-size: 1.35rem; margin: 0; font-weight: 650; letter-spacing: -0.01em; }
+  #oppdatert { color: var(--tekst-svak); font-size: 0.9rem; }
+
+  .banner {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 18px; border-radius: 10px; border: 1px solid var(--kant);
+    background: var(--flate); font-weight: 600; font-size: 1.05rem;
+  }
+  .banner .prikk { width: 14px; height: 14px; border-radius: 50%; flex: none; background: var(--graa); }
+  .banner[data-samlet="oppe"] { background: var(--gronn-bg); border-color: transparent; }
+  .banner[data-samlet="oppe"] .prikk { background: var(--gronn); }
+  .banner[data-samlet="treg"] { background: var(--gul-bg); border-color: transparent; }
+  .banner[data-samlet="treg"] .prikk { background: var(--gul); }
+  .banner[data-samlet="nede"] { background: var(--rod-bg); border-color: transparent; }
+  .banner[data-samlet="nede"] .prikk { background: var(--rod); }
+
+  #reserve {
+    display: none; margin-top: 12px; padding: 10px 14px; border-radius: 8px;
+    background: var(--varsel-bg); border: 1px solid var(--varsel-kant); font-size: 0.92rem;
+  }
+  #reserve.vis { display: block; }
+
+  section { margin-top: 28px; }
+  h2 { font-size: 1rem; font-weight: 650; margin: 0 0 10px; color: var(--tekst-svak); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .kort { background: var(--flate); border: 1px solid var(--kant); border-radius: 10px; overflow: hidden; }
+  .tjeneste { padding: 14px 16px; border-top: 1px solid var(--kant); }
+  .tjeneste:first-child { border-top: 0; }
+  .tjeneste .topp { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .tjeneste .navn { font-weight: 600; }
+  .tjeneste .siden { color: var(--tekst-svak); font-size: 0.85rem; font-weight: 400; margin-left: 8px; }
+
+  .merke {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 0.82rem; font-weight: 600; padding: 3px 10px; border-radius: 999px;
+    background: var(--graa-bg); color: var(--tekst-svak);
+  }
+  .merke::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--graa); }
+  .merke[data-tilstand="oppe"] { background: var(--gronn-bg); color: var(--gronn); }
+  .merke[data-tilstand="oppe"]::before { background: var(--gronn); }
+  .merke[data-tilstand="treg"] { background: var(--gul-bg); color: var(--gul); }
+  .merke[data-tilstand="treg"]::before { background: var(--gul); }
+  .merke[data-tilstand="nede"] { background: var(--rod-bg); color: var(--rod); }
+  .merke[data-tilstand="nede"]::before { background: var(--rod); }
+
+  .stolper { display: flex; gap: 2px; height: var(--stolpe-h); margin-top: 10px; }
+  .stolpe { flex: 1 1 0; min-width: 0; border-radius: 2px; background: var(--graa); }
+  .stolpe[data-niv="gronn"] { background: var(--gronn); }
+  .stolpe[data-niv="gul"] { background: var(--gul); }
+  .stolpe[data-niv="rod"] { background: var(--rod); }
+  .stolpe:hover { opacity: 0.75; }
+
+  .oppetid { display: flex; justify-content: space-between; gap: 8px; margin-top: 6px; color: var(--tekst-svak); font-size: 0.8rem; flex-wrap: wrap; }
+  .oppetid span b { font-weight: 600; color: var(--tekst); }
+
+  .hendelse { padding: 14px 16px; border-top: 1px solid var(--kant); }
+  .hendelse:first-child { border-top: 0; }
+  .hendelse .linje1 { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .hendelse .type { font-weight: 600; }
+  .hendelse .type[data-type="nede"] { color: var(--rod); }
+  .hendelse .type[data-type="treg"] { color: var(--gul); }
+  .hendelse .naar { color: var(--tekst-svak); font-size: 0.88rem; }
+  .hendelse .aarsak { margin-top: 4px; font-size: 0.92rem; }
+  .hendelse .paagaar { color: var(--rod); font-weight: 600; }
+
+  .tom { padding: 16px; color: var(--tekst-svak); }
+  footer { margin-top: 36px; color: var(--tekst-svak); font-size: 0.85rem; }
+
+  @media (max-width: 480px) {
+    :root { --stolpe-h: 24px; }
+    .stolper { gap: 1px; }
+    .oppetid { font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Flowment driftsstatus</h1>
+    <div id="oppdatert">Henter status …</div>
+  </header>
+
+  <div class="banner" id="banner" data-samlet="ukjent" role="status" aria-live="polite">
+    <span class="prikk" aria-hidden="true"></span>
+    <span id="banner-tekst">Henter status …</span>
+  </div>
+  <div id="reserve" role="alert"></div>
+
+  <section aria-labelledby="h-tjenester">
+    <h2 id="h-tjenester">Tjenester</h2>
+    <div class="kort" id="tjenester"></div>
+  </section>
+
+  <section aria-labelledby="h-hendelser">
+    <h2 id="h-hendelser">Hendelser</h2>
+    <div class="kort" id="hendelser"><div class="tom">Ingen hendelser registrert.</div></div>
+  </section>
+
+  <footer>
+    Tjenestene sjekkes hvert minutt fra driftsvakta til Flowment. Sida oppdaterer seg selv hvert minutt.
+    Spørsmål? <a href="https://flowment.no/">flowment.no</a>
+  </footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  // Kilden er admin sitt offentlige status-API. Går det ned, viser vi sist kjente status fra
+  // status.json i dette repoet, som reserve-vakta (driftsvakt-reserve.yml) skriver.
+  var API = "https://admin.flowment.no/api/status";
+  var RESERVE = "./status.json";
+  var INTERVALL_MS = 60000;
+  var DAGER = 90;
+
+  var TILSTAND_TEKST = { oppe: "Oppe", treg: "Treg", nede: "Nede", ukjent: "Ukjent" };
+  var SAMLET_TEKST = {
+    oppe: "Alle systemer er oppe",
+    treg: "Redusert ytelse på enkelte tjenester",
+    nede: "Nedetid på enkelte tjenester",
+    ukjent: "Status er ukjent",
+  };
+  var TYPE_TEKST = { nede: "Nedetid", treg: "Redusert ytelse" };
+
+  var fmtKlokke = new Intl.DateTimeFormat("nb-NO", { timeZone: "Europe/Oslo", hour: "2-digit", minute: "2-digit" });
+  var fmtDato = new Intl.DateTimeFormat("nb-NO", { timeZone: "Europe/Oslo", day: "2-digit", month: "2-digit", year: "numeric" });
+  var fmtDatoKort = new Intl.DateTimeFormat("nb-NO", { timeZone: "Europe/Oslo", day: "numeric", month: "short" });
+
+  function klokke(iso) { return iso ? fmtKlokke.format(new Date(iso)) : "–"; }
+  function dato(iso) { return iso ? fmtDato.format(new Date(iso)) : "–"; }
+  function datoOgKlokke(iso) { return iso ? fmtDatoKort.format(new Date(iso)) + " kl. " + klokke(iso) : "–"; }
+
+  // Samme regler som formaterVarighet i admin, så tallene stemmer med Telegram-meldingene.
+  function varighet(fraIso, tilIso) {
+    var ms = Math.max(0, new Date(tilIso).getTime() - new Date(fraIso).getTime());
+    var min = Math.round(ms / 60000);
+    if (min < 1) return "under ett minutt";
+    if (min < 60) return min + " min";
+    var t = Math.floor(min / 60), rest = min % 60;
+    if (t < 24) return rest ? t + " t " + rest + " min" : t + " t";
+    var d = Math.floor(t / 24), restT = t % 24;
+    return restT ? d + " d " + restT + " t" : d + " d";
+  }
+
+  function prosent(p) {
+    if (p === null || p === undefined || isNaN(p)) return "–";
+    return p.toLocaleString("nb-NO", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " %";
+  }
+
+  function el(tag, cls, tekst) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (tekst !== undefined && tekst !== null) e.textContent = tekst;
+    return e;
+  }
+
+  // Dagene i drift_dag er UTC-datoer (YYYY-MM-DD). Vi lager 90 plasser med samme nøkkel,
+  // eldste først, så en dag uten data blir en grå stolpe i stedet for et hull.
+  function dagNokler() {
+    var ut = [];
+    var naa = new Date();
+    for (var i = DAGER - 1; i >= 0; i--) {
+      var d = new Date(Date.UTC(naa.getUTCFullYear(), naa.getUTCMonth(), naa.getUTCDate() - i));
+      ut.push(d.toISOString().slice(0, 10));
+    }
+    return ut;
+  }
+
+  function datoFraNokkel(n) {
+    var deler = n.split("-");
+    return deler[2] + "." + deler[1] + "." + deler[0];
+  }
+
+  function stolperad(dager) {
+    var kart = {};
+    (dager || []).forEach(function (d) { kart[d.dag] = d; });
+    var rad = el("div", "stolper");
+    rad.setAttribute("role", "img");
+    rad.setAttribute("aria-label", "Oppetid per dag de siste " + DAGER + " dagene");
+    dagNokler().forEach(function (n) {
+      var d = kart[n];
+      var s = el("div", "stolpe");
+      if (!d || !d.sjekker) {
+        s.dataset.niv = "ingen";
+        s.title = datoFraNokkel(n) + " · ingen data";
+      } else {
+        var p = (d.ok / d.sjekker) * 100;
+        s.dataset.niv = p >= 99.9 ? "gronn" : p >= 99 ? "gul" : "rod";
+        s.title = datoFraNokkel(n) + " · " + prosent(p) + (d.trege ? " · " + d.trege + " trege sjekker" : "");
+      }
+      rad.appendChild(s);
+    });
+    return rad;
+  }
+
+  function tjenesteRad(t) {
+    var rad = el("div", "tjeneste");
+    var topp = el("div", "topp");
+    var navn = el("div", "navn", t.navn);
+    if ((t.tilstand === "nede" || t.tilstand === "treg") && t.siden) {
+      navn.appendChild(el("span", "siden", "siden " + datoOgKlokke(t.siden)));
+    }
+    var merke = el("span", "merke", TILSTAND_TEKST[t.tilstand] || TILSTAND_TEKST.ukjent);
+    merke.dataset.tilstand = t.tilstand || "ukjent";
+    topp.appendChild(navn);
+    topp.appendChild(merke);
+    rad.appendChild(topp);
+    rad.appendChild(stolperad(t.dager));
+
+    var o = t.oppetid || {};
+    var opp = el("div", "oppetid");
+    [["7 dager", o.d7], ["30 dager", o.d30], ["90 dager", o.d90]].forEach(function (par) {
+      var s = el("span", null, par[0] + ": ");
+      s.appendChild(el("b", null, prosent(par[1])));
+      opp.appendChild(s);
+    });
+    rad.appendChild(opp);
+    return rad;
+  }
+
+  function hendelseRad(h, naa) {
+    var rad = el("div", "hendelse");
+    var l1 = el("div", "linje1");
+    var type = el("span", "type", TYPE_TEKST[h.type] || h.type);
+    type.dataset.type = h.type;
+    l1.appendChild(type);
+    l1.appendChild(el("span", null, (h.tjenester || []).join(", ") || "–"));
+    var naar = el("span", "naar");
+    if (h.avsluttet) {
+      naar.textContent = dato(h.startet) + " " + klokke(h.startet) + "–" + klokke(h.avsluttet) + " · " + varighet(h.startet, h.avsluttet);
+    } else {
+      naar.textContent = "startet " + dato(h.startet) + " " + klokke(h.startet) + " · ";
+      naar.appendChild(el("span", "paagaar", "pågår (" + varighet(h.startet, naa) + ")"));
+    }
+    l1.appendChild(naar);
+    rad.appendChild(l1);
+    if (h.aarsak) rad.appendChild(el("div", "aarsak", h.aarsak));
+    return rad;
+  }
+
+  function tegn(data, reserve) {
+    var naa = new Date().toISOString();
+    var samlet = data.samlet || "ukjent";
+    // Reservefila kan si «oppe» uten at noen tjeneste faktisk er sjekket (alle «ukjent»).
+    // Da er ærlig svar «ukjent», ikke «alle systemer er oppe».
+    var noenKjent = (data.tjenester || []).some(function (t) { return t.tilstand && t.tilstand !== "ukjent"; });
+    if (!noenKjent) samlet = "ukjent";
+    var banner = document.getElementById("banner");
+    banner.dataset.samlet = samlet;
+    document.getElementById("banner-tekst").textContent = SAMLET_TEKST[samlet] || SAMLET_TEKST.ukjent;
+    document.getElementById("oppdatert").textContent = "Sist oppdatert " + klokke(data.oppdatert || naa);
+
+    var reserveEl = document.getElementById("reserve");
+    if (reserve) {
+      reserveEl.textContent = "Live-status er ikke tilgjengelig akkurat nå — viser sist kjente status fra " + klokke(data.oppdatert) + ".";
+      reserveEl.classList.add("vis");
+    } else {
+      reserveEl.classList.remove("vis");
+    }
+
+    var tj = document.getElementById("tjenester");
+    tj.textContent = "";
+    (data.tjenester || []).forEach(function (t) { tj.appendChild(tjenesteRad(t)); });
+    if (!tj.childNodes.length) tj.appendChild(el("div", "tom", "Ingen tjenester å vise."));
+
+    var he = document.getElementById("hendelser");
+    he.textContent = "";
+    var liste = (data.hendelser || []).slice(0, 20);
+    liste.forEach(function (h) { he.appendChild(hendelseRad(h, naa)); });
+    if (!liste.length) he.appendChild(el("div", "tom", "Ingen hendelser de siste 90 dagene."));
+  }
+
+  function hent(url, timeoutMs) {
+    var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, timeoutMs) : null;
+    return fetch(url, { cache: "no-store", signal: ctrl ? ctrl.signal : undefined })
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .finally(function () { if (timer) clearTimeout(timer); });
+  }
+
+  function oppdater() {
+    hent(API, 10000)
+      .then(function (data) { tegn(data, false); })
+      .catch(function () {
+        // Admin svarer ikke: hent siste kjente status fra dette repoet. Tidsstempel i URL-en
+        // så GitHub Pages / nettleseren ikke gir oss en gammel kopi.
+        return hent(RESERVE + "?t=" + Date.now(), 10000)
+          .then(function (data) { tegn(data, true); })
+          .catch(function () {
+            var banner = document.getElementById("banner");
+            banner.dataset.samlet = "ukjent";
+            document.getElementById("banner-tekst").textContent = "Kunne ikke hente status akkurat nå";
+            document.getElementById("oppdatert").textContent = "Prøver igjen om ett minutt";
+            var reserveEl = document.getElementById("reserve");
+            reserveEl.textContent = "Live-status er ikke tilgjengelig akkurat nå, og ingen reservestatus ble funnet.";
+            reserveEl.classList.add("vis");
+          });
+      });
+  }
+
+  oppdater();
+  setInterval(oppdater, INTERVALL_MS);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") oppdater();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+name: Driftsvakt-reserve
+
+# Reserven for driftsvakta i admin (flowment-admin, lib/drift/vakt.ts).
+#
+# Vakta sjekker alle tjenester hvert minutt og sier fra i Telegram — men den kan ikke si
+# fra om seg selv. Går admin.flowment.no ned, blir det stille, og stillhet ser ut som
+# «alt oppe». Denne workflowen kjører utenfor Flowment sine servere (GitHub Actions) og
+# gjør to ting når admin ikke svarer:
+#
+#   1. Sier fra i Telegram, én gang, etter to kjøringer på rad uten svar (≥ 5 min), så
+#      en restart eller et enkelt tapt kall ikke vekker noen. Og én gang når admin er
+#      tilbake.
+#   2. Skriver sine egne funn til status.json i dette repoet, som status.flowment.no
+#      faller tilbake til når API-et i admin ikke svarer. Da viser statussida fortsatt noe
+#      sant om Plattformen, Nettsiden, Database og Møter mens admin er nede.
+#
+# Dedupe uten database: repository-variabelen DRIFT_RESERVE_TILSTAND husker hvor vi er
+# mellom kjøringene. Verdier:
+#   ok                          admin svarer (eller vi har aldri sett feil)
+#   admin_nede:<ISO>            første kjøring uten svar, ikke varslet ennå
+#   admin_nede_varslet:<ISO>    varslet, venter på at admin kommer tilbake
+# <ISO> er tidspunktet for første feil, så meldingen kan si «siden HH:MM».
+#
+# Alt skjer med GITHUB_TOKEN i eget repo (contents: write for status.json, actions: write
+# for variabelen). Secrets som må finnes: TELEGRAM_BOT_TOKEN og DRIFT_TELEGRAM_CHAT_ID.
+# Mangler de, hopper vi over Telegram og skriver en advarsel i loggen — status.json
+# oppdateres uansett.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      simuler_admin_nede:
+        description: "Lat som admin.flowment.no ikke svarer (til å teste varsling og status.json)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+# Aldri to kjøringer samtidig: begge ville lese samme tilstand og begge ville varsle.
+concurrency:
+  group: driftsvakt-reserve
+  cancel-in-progress: false
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GH_REPO: ${{ github.repository }}
+  TILSTAND_VAR: DRIFT_RESERVE_TILSTAND
+  MARCUS_TELEGRAM_ID: "6403013579"
+
+jobs:
+  reserve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      # Samme sjekker som vakta gjør for de offentlige tjenestene, men bare HTTP-koden:
+      # reserven skal være enkel nok til at den aldri selv er grunnen til at noe feiler.
+      # 10 s timeout per kall; «000» betyr at curl ikke fikk svar i det hele tatt.
+      - name: Sjekk tjenestene
+        id: sjekk
+        shell: bash
+        run: |
+          set -u
+          sjekk() {
+            # $1 = url. Skriver «<kode> <ms>» — koden er 000 ved timeout/DNS/TLS-feil.
+            local ut
+            ut=$(curl -sS -o /dev/null --max-time 10 -w '%{http_code} %{time_total}' "$1" 2>/dev/null) || ut="000 0"
+            local kode=${ut%% *} tid=${ut##* }
+            echo "$kode $(awk -v t="$tid" 'BEGIN { printf "%d", t * 1000 }')"
+          }
+          les() { read -r "$1_kode" "$1_ms" <<<"$(sjekk "$2")"; }
+
+          les admin    https://admin.flowment.no/api/health
+          les app      https://app.flowment.no/api/health
+          les supabase https://supabase.flowment.no/auth/v1/health
+          les nettside https://flowment.no/
+          les meet     https://meet.flowment.no/
+
+          if [ "${{ inputs.simuler_admin_nede }}" = "true" ]; then
+            echo "::warning::Simulerer at admin ikke svarer (workflow_dispatch)."
+            admin_kode=000; admin_ms=0
+          fi
+
+          for t in admin app supabase nettside meet; do
+            kode="${t}_kode"; ms="${t}_ms"
+            echo "$t: ${!kode} (${!ms} ms)"
+            echo "${t}_kode=${!kode}" >> "$GITHUB_OUTPUT"
+            echo "${t}_ms=${!ms}" >> "$GITHUB_OUTPUT"
+          done
+          echo "naa=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      # Tilstandsmaskinen. Leser variabelen, regner ut hva som skal skje, og sier det
+      # videre som outputs så stegene under er små og lesbare.
+      - name: Finn ut hva som skal skje
+        id: tilstand
+        shell: bash
+        env:
+          ADMIN_KODE: ${{ steps.sjekk.outputs.admin_kode }}
+          NAA: ${{ steps.sjekk.outputs.naa }}
+        run: |
+          set -u
+          forrige=$(gh variable get "$TILSTAND_VAR" --repo "$GH_REPO" 2>/dev/null || echo ok)
+          forrige=${forrige:-ok}
+          echo "Forrige tilstand: $forrige"
+
+          admin_oppe=false
+          case "$ADMIN_KODE" in 2*|3*) admin_oppe=true ;; esac
+
+          ny="$forrige"; varsle_nede=false; varsle_tilbake=false; siden=""
+          if $admin_oppe; then
+            case "$forrige" in
+              admin_nede_varslet:*) varsle_tilbake=true; siden=${forrige#*:} ;;
+            esac
+            ny=ok
+          else
+            case "$forrige" in
+              ok)                   ny="admin_nede:$NAA" ;;
+              admin_nede:*)         siden=${forrige#*:}; ny="admin_nede_varslet:$siden"; varsle_nede=true ;;
+              admin_nede_varslet:*) siden=${forrige#*:} ;;
+              *)                    ny="admin_nede:$NAA" ;;
+            esac
+          fi
+
+          echo "Ny tilstand: $ny (varsle nede: $varsle_nede, varsle tilbake: $varsle_tilbake)"
+          {
+            echo "admin_oppe=$admin_oppe"
+            echo "ny=$ny"
+            echo "endret=$([ "$ny" != "$forrige" ] && echo true || echo false)"
+            echo "varsle_nede=$varsle_nede"
+            echo "varsle_tilbake=$varsle_tilbake"
+            echo "siden=$siden"
+          } >> "$GITHUB_OUTPUT"
+
+      # Går før Telegram-steget med vilje: feiler sendingen, skal status.json likevel være
+      # skrevet, og tilstanden lagres ikke, så meldingen prøves igjen neste kjøring.
+      #
+      # status.json i samme form som admin sitt /api/status, med det reserven faktisk vet:
+      # tilstand for de fire tjenestene den sjekker selv, «ukjent» for E-post og Video
+      # (leverandørenes statussider spør vi ikke her), ingen historikk, ingen hendelser.
+      # Committes bare når tilstandene er endret, eller når fila er over en time gammel —
+      # én commit per endring, ikke én hvert femte minutt gjennom en lang nedetid.
+      - name: Oppdater status.json
+        if: steps.tilstand.outputs.admin_oppe == 'false'
+        shell: bash
+        env:
+          NAA: ${{ steps.sjekk.outputs.naa }}
+          APP_KODE: ${{ steps.sjekk.outputs.app_kode }}
+          APP_MS: ${{ steps.sjekk.outputs.app_ms }}
+          NETTSIDE_KODE: ${{ steps.sjekk.outputs.nettside_kode }}
+          NETTSIDE_MS: ${{ steps.sjekk.outputs.nettside_ms }}
+          SUPABASE_KODE: ${{ steps.sjekk.outputs.supabase_kode }}
+          SUPABASE_MS: ${{ steps.sjekk.outputs.supabase_ms }}
+          MEET_KODE: ${{ steps.sjekk.outputs.meet_kode }}
+          MEET_MS: ${{ steps.sjekk.outputs.meet_ms }}
+        run: |
+          set -eu
+          tilstand() { case "$1" in 2*|3*) echo oppe ;; *) echo nede ;; esac; }
+          tjeneste() {
+            # $1 id, $2 navn, $3 tilstand, $4 ms (tom = null)
+            jq -n --arg id "$1" --arg navn "$2" --arg tilstand "$3" --arg naa "$NAA" --arg ms "${4:-}" '{
+              id: $id, navn: $navn, tilstand: $tilstand, siden: null,
+              sistSjekk: (if $tilstand == "ukjent" then null else $naa end),
+              svartidMs: (if $ms == "" then null else ($ms | tonumber) end),
+              oppetid: { d7: null, d30: null, d90: null }, dager: []
+            }'
+          }
+          {
+            tjeneste app           Plattformen "$(tilstand "$APP_KODE")"      "$APP_MS"
+            tjeneste nettside      Nettsiden   "$(tilstand "$NETTSIDE_KODE")" "$NETTSIDE_MS"
+            tjeneste supabase-prod Database    "$(tilstand "$SUPABASE_KODE")" "$SUPABASE_MS"
+            tjeneste meet          "Møter"     "$(tilstand "$MEET_KODE")"     "$MEET_MS"
+            tjeneste resend        E-post      ukjent ""
+            tjeneste livekit       Video       ukjent ""
+          } | jq -s --arg naa "$NAA" '{
+            oppdatert: $naa,
+            samlet: (if any(.[]; .tilstand == "nede") then "nede" else "oppe" end),
+            tjenester: ., hendelser: []
+          }' > status.ny.json
+
+          # Sammenlign uten tidsstempler og svartider: det er tilstandene som teller.
+          kjerne() { jq -S 'del(.oppdatert) | .tjenester |= map(del(.sistSjekk, .svartidMs))' "$1"; }
+          gammel_tid=$(jq -r '.oppdatert // empty' status.json 2>/dev/null || true)
+          alder_min=$(( ( $(date -u +%s) - $(date -d "${gammel_tid:-1970-01-01T00:00:00Z}" +%s) ) / 60 ))
+          if [ "$(kjerne status.ny.json)" = "$(kjerne status.json 2>/dev/null)" ] && [ "$alder_min" -lt 60 ]; then
+            echo "status.json er uendret (sist skrevet for $alder_min min siden) — ingen commit."
+            rm -f status.ny.json
+            exit 0
+          fi
+          mv status.ny.json status.json
+          git config user.name "driftsvakt-reserve"
+          git config user.email "driftsvakt-reserve@users.noreply.github.com"
+          git add status.json
+          git commit -m "status: reserven skrev status.json $(TZ=Europe/Oslo date -d "$NAA" '+%d.%m.%Y %H:%M') (admin svarer ikke)"
+          git pull --rebase --quiet
+          git push
+          echo "status.json oppdatert og pushet."
+
+      # Telegram: parse_mode HTML som resten av vakta, og et navngitt ping på Marcus via
+      # tg://user?id= — det virker uten @brukernavn og er det eneste som gir varsel for
+      # medlemmer uten brukernavn. Bot-token og chat-id er secrets i dette repoet.
+      - name: Varsle i Telegram
+        if: steps.tilstand.outputs.varsle_nede == 'true' || steps.tilstand.outputs.varsle_tilbake == 'true'
+        shell: bash
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          DRIFT_TELEGRAM_CHAT_ID: ${{ secrets.DRIFT_TELEGRAM_CHAT_ID }}
+          VARSLE_NEDE: ${{ steps.tilstand.outputs.varsle_nede }}
+          SIDEN: ${{ steps.tilstand.outputs.siden }}
+          NAA: ${{ steps.sjekk.outputs.naa }}
+          APP: ${{ steps.sjekk.outputs.app_kode }}
+          NETTSIDE: ${{ steps.sjekk.outputs.nettside_kode }}
+          SUPABASE: ${{ steps.sjekk.outputs.supabase_kode }}
+          MEET: ${{ steps.sjekk.outputs.meet_kode }}
+        run: |
+          set -u
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$DRIFT_TELEGRAM_CHAT_ID" ]; then
+            echo "::warning::TELEGRAM_BOT_TOKEN eller DRIFT_TELEGRAM_CHAT_ID mangler — ingen melding sendt."
+            exit 0
+          fi
+          klokke() { TZ=Europe/Oslo date -d "$1" +%H:%M; }
+          ping="<a href=\"tg://user?id=$MARCUS_TELEGRAM_ID\">Marcus</a>"
+          if [ "$VARSLE_NEDE" = "true" ]; then
+            tekst="<b>Driftsvakta</b> (admin.flowment.no) svarer ikke siden $(klokke "$SIDEN").
+          Reserven sjekker: Plattformen $APP, Nettsiden $NETTSIDE, Database $SUPABASE, Møter $MEET.
+          status.flowment.no viser reservestatus til admin er tilbake. $ping"
+          else
+            varighet=$(( ( $(date -d "$NAA" +%s) - $(date -d "$SIDEN" +%s) ) / 60 ))
+            tekst="<b>Driftsvakta er tilbake</b> (admin.flowment.no) kl. $(klokke "$NAA"), etter ${varighet} min uten svar. $ping"
+          fi
+          # Innrykket i heredocen over skal ikke med i meldingen.
+          tekst=$(printf '%s\n' "$tekst" | sed 's/^[[:space:]]*//')
+          svar=$(curl -sS --max-time 15 -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${DRIFT_TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${tekst}" \
+            --data-urlencode "parse_mode=HTML" \
+            --data-urlencode "disable_web_page_preview=true")
+          if ! printf '%s' "$svar" | grep -q '"ok":true'; then
+            echo "::error::Telegram avviste meldingen: $svar"
+            exit 1
+          fi
+          echo "Melding sendt."
+
+      - name: Lagre tilstand
+        if: steps.tilstand.outputs.endret == 'true'
+        shell: bash
+        env:
+          NY: ${{ steps.tilstand.outputs.ny }}
+        run: |
+          gh variable set "$TILSTAND_VAR" --body "$NY" --repo "$GH_REPO"
+          echo "Tilstand lagret: $NY"
