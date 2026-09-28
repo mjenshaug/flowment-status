@@ -14,17 +14,22 @@ name: Driftsvakt-reserve
 #      faller tilbake til når API-et i admin ikke svarer. Da viser statussida fortsatt noe
 #      sant om Plattformen, Nettsiden, Database og Møter mens admin er nede.
 #
-# Dedupe uten database: repository-variabelen DRIFT_RESERVE_TILSTAND husker hvor vi er
-# mellom kjøringene. Verdier:
+# Dedupe uten database: fila reserve-tilstand.txt i dette repoet husker hvor vi er mellom
+# kjøringene, og committes sammen med status.json. (Repository-variabler var første valg,
+# men GITHUB_TOKEN får ikke skrive dem — «Resource not accessible by integration» — og en
+# PAT bare for det er ikke verdt vedlikeholdet.) Verdier:
 #   ok                          admin svarer (eller vi har aldri sett feil)
 #   admin_nede:<ISO>            første kjøring uten svar, ikke varslet ennå
 #   admin_nede_varslet:<ISO>    varslet, venter på at admin kommer tilbake
 # <ISO> er tidspunktet for første feil, så meldingen kan si «siden HH:MM».
 #
-# Alt skjer med GITHUB_TOKEN i eget repo (contents: write for status.json, actions: write
-# for variabelen). Secrets som må finnes: TELEGRAM_BOT_TOKEN og DRIFT_TELEGRAM_CHAT_ID.
-# Mangler de, hopper vi over Telegram og skriver en advarsel i loggen — status.json
-# oppdateres uansett.
+# Alt skjer med GITHUB_TOKEN i eget repo (contents: write). Secrets som må finnes:
+# TELEGRAM_BOT_TOKEN og DRIFT_TELEGRAM_CHAT_ID. Mangler de, hopper vi over Telegram og
+# skriver en advarsel i loggen — status.json oppdateres uansett.
+#
+# Database-sjekken går mot Kong uten nøkkel og får 401 «No API key found». Det godtas som
+# «oppe»: gatewayen svarer, og reserven skal ikke ha en nøkkel. Den grundige sjekken (auth
+# og PostgREST med anon-nøkkel) er vakta i admin sin jobb.
 
 on:
   schedule:
@@ -38,7 +43,6 @@ on:
 
 permissions:
   contents: write
-  actions: write
 
 # Aldri to kjøringer samtidig: begge ville lese samme tilstand og begge ville varsle.
 concurrency:
@@ -46,9 +50,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  GH_REPO: ${{ github.repository }}
-  TILSTAND_VAR: DRIFT_RESERVE_TILSTAND
+  TILSTAND_FIL: reserve-tilstand.txt
   MARCUS_TELEGRAM_ID: "6403013579"
 
 jobs:
@@ -94,8 +96,9 @@ jobs:
           done
           echo "naa=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
-      # Tilstandsmaskinen. Leser variabelen, regner ut hva som skal skje, og sier det
-      # videre som outputs så stegene under er små og lesbare.
+      # Tilstandsmaskinen. Leser tilstandsfila, regner ut hva som skal skje, og sier det
+      # videre som outputs så stegene under er små og lesbare. Selve lagringen skjer i
+      # siste steg, etter Telegram, så et mislykket varsel prøves igjen neste kjøring.
       - name: Finn ut hva som skal skje
         id: tilstand
         shell: bash
@@ -104,7 +107,7 @@ jobs:
           NAA: ${{ steps.sjekk.outputs.naa }}
         run: |
           set -u
-          forrige=$(gh variable get "$TILSTAND_VAR" --repo "$GH_REPO" 2>/dev/null || echo ok)
+          forrige=$(tr -d '[:space:]' < "$TILSTAND_FIL" 2>/dev/null || echo ok)
           forrige=${forrige:-ok}
           echo "Forrige tilstand: $forrige"
 
@@ -136,14 +139,12 @@ jobs:
             echo "siden=$siden"
           } >> "$GITHUB_OUTPUT"
 
-      # Går før Telegram-steget med vilje: feiler sendingen, skal status.json likevel være
-      # skrevet, og tilstanden lagres ikke, så meldingen prøves igjen neste kjøring.
-      #
       # status.json i samme form som admin sitt /api/status, med det reserven faktisk vet:
       # tilstand for de fire tjenestene den sjekker selv, «ukjent» for E-post og Video
       # (leverandørenes statussider spør vi ikke her), ingen historikk, ingen hendelser.
-      # Committes bare når tilstandene er endret, eller når fila er over en time gammel —
+      # Skrives bare når tilstandene er endret, eller når fila er over en time gammel —
       # én commit per endring, ikke én hvert femte minutt gjennom en lang nedetid.
+      # Committes i siste steg, sammen med tilstandsfila.
       - name: Oppdater status.json
         if: steps.tilstand.outputs.admin_oppe == 'false'
         shell: bash
@@ -160,6 +161,8 @@ jobs:
         run: |
           set -eu
           tilstand() { case "$1" in 2*|3*) echo oppe ;; *) echo nede ;; esac; }
+          # Kong svarer 401/403 uten nøkkel — se toppen av fila.
+          gateway() { case "$1" in 2*|3*|401|403) echo oppe ;; *) echo nede ;; esac; }
           tjeneste() {
             # $1 id, $2 navn, $3 tilstand, $4 ms (tom = null)
             jq -n --arg id "$1" --arg navn "$2" --arg tilstand "$3" --arg naa "$NAA" --arg ms "${4:-}" '{
@@ -172,7 +175,7 @@ jobs:
           {
             tjeneste app           Plattformen "$(tilstand "$APP_KODE")"      "$APP_MS"
             tjeneste nettside      Nettsiden   "$(tilstand "$NETTSIDE_KODE")" "$NETTSIDE_MS"
-            tjeneste supabase-prod Database    "$(tilstand "$SUPABASE_KODE")" "$SUPABASE_MS"
+            tjeneste supabase-prod Database    "$(gateway "$SUPABASE_KODE")"  "$SUPABASE_MS"
             tjeneste meet          "Møter"     "$(tilstand "$MEET_KODE")"     "$MEET_MS"
             tjeneste resend        E-post      ukjent ""
             tjeneste livekit       Video       ukjent ""
@@ -187,23 +190,18 @@ jobs:
           gammel_tid=$(jq -r '.oppdatert // empty' status.json 2>/dev/null || true)
           alder_min=$(( ( $(date -u +%s) - $(date -d "${gammel_tid:-1970-01-01T00:00:00Z}" +%s) ) / 60 ))
           if [ "$(kjerne status.ny.json)" = "$(kjerne status.json 2>/dev/null)" ] && [ "$alder_min" -lt 60 ]; then
-            echo "status.json er uendret (sist skrevet for $alder_min min siden) — ingen commit."
+            echo "status.json er uendret (sist skrevet for $alder_min min siden) — rører den ikke."
             rm -f status.ny.json
             exit 0
           fi
           mv status.ny.json status.json
-          git config user.name "driftsvakt-reserve"
-          git config user.email "driftsvakt-reserve@users.noreply.github.com"
-          git add status.json
-          git commit -m "status: reserven skrev status.json $(TZ=Europe/Oslo date -d "$NAA" '+%d.%m.%Y %H:%M') (admin svarer ikke)"
-          git pull --rebase --quiet
-          git push
-          echo "status.json oppdatert og pushet."
+          echo "status.json skrevet med reservens funn."
 
       # Telegram: parse_mode HTML som resten av vakta, og et navngitt ping på Marcus via
       # tg://user?id= — det virker uten @brukernavn og er det eneste som gir varsel for
       # medlemmer uten brukernavn. Bot-token og chat-id er secrets i dette repoet.
       - name: Varsle i Telegram
+        id: telegram
         if: steps.tilstand.outputs.varsle_nede == 'true' || steps.tilstand.outputs.varsle_tilbake == 'true'
         shell: bash
         env:
@@ -245,11 +243,30 @@ jobs:
           fi
           echo "Melding sendt."
 
-      - name: Lagre tilstand
-        if: steps.tilstand.outputs.endret == 'true'
+      # Én commit per kjøring, og bare når noe er endret. Kjører også når Telegram-steget
+      # feilet (always), men da uten å skrive ny tilstand: varselet skal prøves igjen.
+      - name: Lagre tilstand og status.json
+        if: always() && steps.tilstand.outcome == 'success'
         shell: bash
         env:
           NY: ${{ steps.tilstand.outputs.ny }}
+          ENDRET: ${{ steps.tilstand.outputs.endret }}
+          TELEGRAM_UTFALL: ${{ steps.telegram.outcome }}
+          NAA: ${{ steps.sjekk.outputs.naa }}
         run: |
-          gh variable set "$TILSTAND_VAR" --body "$NY" --repo "$GH_REPO"
-          echo "Tilstand lagret: $NY"
+          set -eu
+          if [ "$ENDRET" = "true" ] && [ "$TELEGRAM_UTFALL" != "failure" ]; then
+            printf '%s\n' "$NY" > "$TILSTAND_FIL"
+            echo "Tilstand: $NY"
+          fi
+          git add status.json "$TILSTAND_FIL"
+          if git diff --cached --quiet; then
+            echo "Ingenting å committe."
+            exit 0
+          fi
+          git config user.name "driftsvakt-reserve"
+          git config user.email "driftsvakt-reserve@users.noreply.github.com"
+          git commit -q -m "reserve: $(tr -d '[:space:]' < "$TILSTAND_FIL" 2>/dev/null || echo ok) $(TZ=Europe/Oslo date -d "$NAA" '+%d.%m.%Y %H:%M')"
+          git pull --rebase --quiet
+          git push --quiet
+          echo "Committet og pushet."

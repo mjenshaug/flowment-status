@@ -23,4 +23,4 @@ i to kjøringer på rad:
   API-et ikke svarer. Sida viser da tydelig at det er sist kjente status, ikke live.
 
 Secrets som må finnes i dette repoet: `TELEGRAM_BOT_TOKEN` og `DRIFT_TELEGRAM_CHAT_ID`.
-Dedupe skjer via repository-variabelen `DRIFT_RESERVE_TILSTAND` (settes av workflowen).
+Dedupe (én melding per nedetid) skjer via fila `reserve-tilstand.txt`, som workflowen committer selv.
